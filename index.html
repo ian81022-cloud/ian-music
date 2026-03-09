@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ian | Film Composer & Music Director</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0D0D12',
+                        darker: '#08080A',
+                        gold: '#C5A059',
+                        goldLight: '#E8D3A2',
+                        grayLight: '#A0A0A5'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Lora', 'serif'],
+                        cinematic: ['Marcellus', 'serif'],
+                    },
+                    backgroundImage: {
+                        'hero-gradient': 'linear-gradient(to top, #0D0D12 0%, rgba(13, 13, 18, 0.7) 40%, rgba(13, 13, 18, 0.2) 100%)',
+                        'metallic-glow': 'radial-gradient(circle at center, rgba(197, 160, 89, 0.15) 0%, transparent 70%)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Iconify -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        /* Custom Cursor */
+        body {
+            cursor: none;
+            background-color: #0D0D12;
+            color: #F8FAFC;
+            overflow-x: hidden;
+        }
+        
+        #cursor-dot, #cursor-ring {
+            position: fixed;
+            top: 0; left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 999999;
+            pointer-events: none;
+        }
+        #cursor-dot {
+            width: 6px; height: 6px;
+            background-color: #C5A059;
+            transition: width 0.2s, height 0.2s, opacity 0.2s;
+        }
+        #cursor-ring {
+            width: 32px; height: 32px;
+            border: 1px solid rgba(197, 160, 89, 0.5);
+            transition: transform 0.1s ease-out, width 0.3s, height 0.3s, border-color 0.3s;
+        }
+
+        /* Hover states for cursor */
+        .hover-target:hover ~ #cursor-dot {
+            opacity: 0;
+        }
+        .hover-target:hover ~ #cursor-ring {
+            width: 50px; height: 50px;
+            border-color: #C5A059;
+            background-color: rgba(197, 160, 89, 0.1);
+            backdrop-filter: blur(2px);
+        }
+
+        /* Film Grain Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Text Utilities */
+        .text-glow {
+            text-shadow: 0 0 20px rgba(197, 160, 89, 0.3);
+        }
+        
+        .split-word {
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: bottom;
+        }
+        .split-char {
+            display: inline-block;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        .reveal-section {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        /* Custom Scrollbar for Playlists */
+        .playlist-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .playlist-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .playlist-scroll::-webkit-scrollbar-thumb {
+            background: rgba(197, 160, 89, 0.3);
+            border-radius: 4px;
+        }
+        .playlist-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(197, 160, 89, 0.6);
+        }
+
+        /* Audio Visualizer Animation */
+        .playing-indicator span {
+            display: inline-block;
+            width: 3px;
+            background-color: #C5A059;
+            border-radius: 2px;
+            margin: 0 1px;
+            animation: bounce 1s infinite ease-in-out;
+        }
+        .playing-indicator span:nth-child(1) { animation-delay: 0s; height: 8px; }
+        .playing-indicator span:nth-child(2) { animation-delay: 0.2s; height: 14px; }
+        .playing-indicator span:nth-child(3) { animation-delay: 0.4s; height: 10px; }
+
+        @keyframes bounce {
+            0%, 100% { transform: scaleY(0.5); }
+            50% { transform: scaleY(1); }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-gold selection:text-dark">
+
+    <div class="noise-overlay"></div>
+
+    <!-- Custom Cursor elements -->
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 top-0 transition-all duration-500 glass-panel" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+            <a href="#" class="text-2xl font-cinematic font-bold tracking-widest text-gold hover-target">IAN</a>
+            <div class="hidden md:flex gap-8 items-center text-sm tracking-widest font-sans uppercase">
+                <a href="#about" class="text-grayLight hover:text-white transition-colors hover-target">About</a>
+                <a href="#works" class="text-grayLight hover:text-white transition-colors hover-target">Works</a>
+                <a href="#services" class="text-grayLight hover:text-white transition-colors hover-target">Services</a>
+                <a href="#contact" class="px-5 py-2 border border-gold/40 text-gold hover:bg-gold hover:text-dark transition-all duration-300 hover-target">Contact</a>
+            </div>
+            <button class="md:hidden text-gold hover-target">
+                <iconify-icon icon="mingcute:menu-fill" width="28"></iconify-icon>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 z-0" id="hero-bg">
+            <img src="Gemini_BK_image.jpg" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2070&auto=format&fit=crop';" alt="Recording Studio" class="w-full h-full object-cover object-center scale-105 opacity-60">
+        </div>
+        
+        <div class="absolute inset-0 z-0 hero-gradient"></div>
+        <!-- 加深背景遮罩，並加入中心暗面漸層，讓前景文字大幅跳脫出來 -->
+        <div class="absolute inset-0 z-0 bg-dark/60"></div>
+        <div class="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,rgba(13,13,18,0.5)_0%,transparent_60%)]"></div>
+
+        <div class="relative z-10 text-center max-w-4xl px-4 flex flex-col items-center mt-16">
+            <p class="font-sans text-goldLight tracking-[0.3em] pl-[0.3em] uppercase text-xs md:text-sm mb-6 split-text">Film Composer & Music Director</p>
+            <!-- 加強 IAN 字樣的金色光暈 (drop-shadow 從 15px 提升到 25px) -->
+            <h1 class="font-cinematic text-5xl md:text-7xl lg:text-9xl tracking-[0.25em] pl-[0.25em] mb-6 text-goldLight drop-shadow-[0_0_25px_rgba(197,160,89,0.6)] leading-tight split-text">IAN</h1>
+            <div class="flex items-center justify-center gap-4 mb-10 font-serif italic text-lg md:text-2xl text-grayLight">
+                <span class="split-text">Epic Orchestral</span>
+                <span class="text-gold opacity-50">|</span>
+                <span class="split-text">Experimental Sound</span>
+                <span class="text-gold opacity-50">|</span>
+                <span class="split-text">Narrative Tension</span>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-6 mt-4">
+                <a href="#works" class="hover-target group relative px-8 py-4 bg-transparent border border-gold text-gold font-sans tracking-widest text-sm uppercase overflow-hidden transition-all hover:text-dark">
+                    <div class="absolute inset-0 bg-gold translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-0"></div>
+                    <span class="relative z-10 flex items-center gap-2">
+                        <iconify-icon icon="ph:play-circle-light" width="20"></iconify-icon>
+                        Listen to Latest Works
+                    </span>
+                </a>
+                <a href="#contact" class="hover-target px-8 py-4 glass-panel text-white font-sans tracking-widest text-sm uppercase hover:bg-white/10 transition-colors flex items-center gap-2">
+                    Get in Touch
+                    <iconify-icon icon="ph:arrow-right-light" width="16"></iconify-icon>
+                </a>
+            </div>
+        </div>
+
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60">
+            <span class="font-sans text-[10px] tracking-[0.2em] uppercase text-grayLight">Scroll</span>
+            <div class="w-[1px] h-12 bg-gradient-to-b from-gold to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-32 bg-dark relative">
+        <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-metallic-glow pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center reveal-section">
+            <div class="relative group">
+                <div class="absolute inset-0 bg-gold/20 translate-x-4 translate-y-4 group-hover:translate-x-6 group-hover:translate-y-6 transition-transform duration-500"></div>
+                <!-- 換上鋼琴插畫照，並加上 grayscale 與 hover:grayscale-0 恢復黑白轉彩色的互動效果 -->
+                <img src="Gemini_Generated_Image_fuva5dfuva5dfuva.jpg" onerror="this.onerror=null; this.src='Gemini_Generated_Image_fuva5dfuva5dfuva.jpg';" alt="Ian Chang at the Piano" class="relative z-10 w-full h-[600px] object-cover grayscale hover:grayscale-0 transition-all duration-700">
+            </div>
+            <div>
+                <h2 class="font-cinematic text-4xl md:text-5xl text-white mb-2 tracking-widest">IAN CHANG</h2>
+                <h3 class="font-sans text-gold tracking-[0.2em] text-xs md:text-sm uppercase mb-6">Film Composer & Music Producer</h3>
+                <div class="w-12 h-[1px] bg-gold mb-8"></div>
+                <div id="about-content-container">
+                    <p class="font-sans text-grayLight leading-relaxed mb-6 font-light text-sm md:text-base">
+                        <!-- 內文已修改為 Netflix series -->
+                        Ian has participated in various domestic and international music productions, including scoring for the Netflix series <em class="text-white font-serif not-italic">The Accidental Influencer</em>, Encore Craft's musical <em class="text-white font-serif not-italic">Zeelandia</em>, music and sound design for the Tainan Art Museum's exhibition <em class="text-white font-serif not-italic">Golden Years: Where Art Resounds</em>, and composing the opening and closing theme music for the <em class="text-white font-serif not-italic">National Railway Museum</em>. Currently, he works at composer Ming-Hsueh Lin's company as an arranger, copyist, and production assistant.
+                    </p>
+                    <p class="font-sans text-grayLight leading-relaxed font-light mb-10 text-sm md:text-base">
+                        Specializing in blending electronic sound with orchestral music, Ian creates works with a strong sense of imagery and spatial depth. His style spans across diverse fields, including theater, film, exhibitions, and commercial brands. He continues to dedicate himself to teaching, scoring, and the practice of sound art.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Selected Works (Discography - 具備獨立播放器) -->
+    <section id="works" class="py-32 bg-darker relative border-y border-white/5">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between items-end mb-16 reveal-section">
+                <div>
+                    <span class="font-sans text-gold tracking-[0.2em] text-sm uppercase mb-2 block">Selected Works</span>
+                    <h2 class="font-cinematic text-4xl md:text-5xl text-white">Cinematic <span class="italic font-serif text-grayLight">Scores</span></h2>
+                </div>
+            </div>
+
+            <!-- Grid container for works -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" id="works-grid">
+                
+                <!-- Work 1 -->
+                <div class="glass-panel border border-white/10 rounded-sm flex flex-col overflow-hidden reveal-section group local-player-card">
+                    <!-- Cover Image -->
+                    <div class="relative aspect-[4/3] overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1925&auto=format&fit=crop" alt="Event Horizon" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
+                        <div class="absolute bottom-4 left-6 right-6">
+                            <p class="font-sans text-gold text-xs tracking-widest uppercase mb-1">Sci-Fi Thriller</p>
+                            <h3 class="font-cinematic text-2xl text-white">Event Horizon</h3>
+                        </div>
+                    </div>
+                    <!-- Independent Player UI -->
+                    <div class="p-6 bg-darker flex-1 flex flex-col justify-between">
+                        <audio class="hidden local-audio" preload="metadata"></audio>
+                        
+                        <!-- Player Controls -->
+                        <div class="flex items-center gap-4 mb-6">
+                            <button class="play-pause-btn text-white hover:text-gold transition-colors scale-110 hover-target">
+                                <iconify-icon icon="ph:play-circle-fill" width="36"></iconify-icon>
+                            </button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between text-[10px] text-grayLight mb-1.5 font-sans tracking-wider">
+                                    <span class="current-time-display">00:00</span>
+                                    <span class="duration-display">--:--</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden cursor-pointer progress-container hover-target">
+                                    <div class="h-full bg-gold w-0 progress-bar transition-all duration-100 ease-linear pointer-events-none"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Independent Tracklist -->
+                        <div class="text-xs uppercase tracking-widest text-grayLight/50 mb-3 font-sans pb-2 border-b border-white/5 flex justify-between">
+                            <span>Tracklist</span>
+                            <span>Playing: <span class="text-gold current-track-name">Main Theme</span></span>
+                        </div>
+                        <ul class="flex flex-col gap-1 font-sans text-sm h-32 overflow-y-auto playlist-scroll pr-2 tracklist">
+                            <li class="p-2 rounded flex justify-between items-center text-grayLight cursor-pointer hover:bg-white/5 hover:text-white transition-colors hover-target track-item" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">
+                                <div class="flex items-center gap-3"><span class="text-xs opacity-50 w-4">01</span> <span class="track-title">Main Theme</span></div>
+                                <div class="playing-indicator hidden items-end h-3"><span></span><span></span><span></span></div>
+                            </li>
+                            <li class="p-2 rounded flex justify-between items-center text-grayLight cursor-pointer hover:bg-white/5 hover:text-white transition-colors hover-target track-item" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3">
+                                <div class="flex items-center gap-3"><span class="text-xs opacity-50 w-4">02</span> <span class="track-title">The Void</span></div>
+                                <div class="playing-indicator hidden items-end h-3"><span></span><span></span><span></span></div>
+                            </li>
+                            <li class="p-2 rounded flex justify-between items-center text-grayLight cursor-pointer hover:bg-white/5 hover:text-white transition-colors hover-target track-item" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3">
+                                <div class="flex items-center gap-3"><span class="text-xs opacity-50 w-4">03</span> <span class="track-title">Awakening</span></div>
+                                <div class="playing-indicator hidden items-end h-3"><span></span><span></span><span></span></div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Work 2 -->
+                <div class="glass-panel border border-white/10 rounded-sm flex flex-col overflow-hidden reveal-section group local-player-card mt-0 md:mt-8">
+                    <!-- Cover Image -->
+                    <div class="relative aspect-[4/3] overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=2070&auto=format&fit=crop" alt="The Silent Echo" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0">
+                        <div class="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
+                        <div class="absolute bottom-4 left-6 right-6">
+                            <p class="font-sans text-gold text-xs tracking-widest uppercase mb-1">Psychological Drama</p>
+                            <h3 class="font-cinematic text-2xl text-white">The Silent Echo</h3>
+                        </div>
+                    </div>
+                    <!-- Independent Player UI -->
+                    <div class="p-6 bg-darker flex-1 flex flex-col justify-between">
+                        <audio class="hidden local-audio" preload="metadata"></audio>
+                        
+                        <div class="flex items-center gap-4 mb-6">
+                            <button class="play-pause-btn text-white hover:text-gold transition-colors scale-110 hover-target">
+                                <iconify-icon icon="ph:play-circle-fill" width="36"></iconify-icon>
+                            </button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between text-[10px] text-grayLight mb-1.5 font-sans tracking-wider">
+                                    <span class="current-time-display">00:00</span>
+                                    <span class="duration-display">--:--</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden cursor-pointer progress-container hover-target">
+                                    <div class="h-full bg-gold w-0 progress-bar transition-all duration-100 ease-linear pointer-events-none"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-xs uppercase tracking-widest text-grayLight/50 mb-3 font-sans pb-2 border-b border-white/5 flex justify-between">
+                            <span>Tracklist</span>
+                            <span>Playing: <span class="text-gold current-track-name">Whispers</span></span>
+                        </div>
+                        <ul class="flex flex-col gap-1 font-sans text-sm h-32 overflow-y-auto playlist-scroll pr-2 tracklist">
+                            <li class="p-2 rounded flex justify-between items-center text-grayLight cursor-pointer hover:bg-white/5 hover:text-white transition-colors hover-target track-item" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3">
+                                <div class="flex items-center gap-3"><span class="text-xs opacity-50 w-4">01</span> <span class="track-title">Whispers</span></div>
+                                <div class="playing-indicator hidden items-end h-3"><span></span><span></span><span></span></div>
+                            </li>
+                            <li class="p-2 rounded flex justify-between items-center text-grayLight cursor-pointer hover:bg-white/5 hover:text-white transition-colors hover-target track-item" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3">
+                                <div class="flex items-center gap-3"><span class="text-xs opacity-50 w-4">02</span> <span class="track-title">Unraveling</span></div>
+                                <div class="playing-indicator hidden items-end h-3"><span></span><span></span><span></span></div>
+                            </li>
+                            <li class="p-2 rounded flex justify-between items-center text-grayLight cursor-pointer hover:bg-white/5 hover:text-white transition-colors hover-target track-item" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3">
+                                <div class="flex items-center gap-3"><span class="text-xs opacity-50 w-4">03</span> <span class="track-title">The Truth</span></div>
+                                <div class="playing-indicator hidden items-end h-3"><span></span><span></span><span></span></div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Work 3 -->
+                <div class="glass-panel border border-white/10 rounded-sm flex flex-col overflow-hidden reveal-section group local-player-card mt-0 md:mt-16">
+                    <!-- Cover Image -->
+                    <div class="relative aspect-[4/3] overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1518972553051-4040a424a1b0?q=80&w=2070&auto=format&fit=crop" alt="Abyss" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
+                        <div class="absolute bottom-4 left-6 right-6">
+                            <p class="font-sans text-gold text-xs tracking-widest uppercase mb-1">Nature Documentary</p>
+                            <h3 class="font-cinematic text-2xl text-white">Abyss</h3>
+                        </div>
+                    </div>
+                    <!-- Independent Player UI -->
+                    <div class="p-6 bg-darker flex-1 flex flex-col justify-between">
+                        <audio class="hidden local-audio" preload="metadata"></audio>
+                        
+                        <div class="flex items-center gap-4 mb-6">
+                            <button class="play-pause-btn text-white hover:text-gold transition-colors scale-110 hover-target">
+                                <iconify-icon icon="ph:play-circle-fill" width="36"></iconify-icon>
+                            </button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between text-[10px] text-grayLight mb-1.5 font-sans tracking-wider">
+                                    <span class="current-time-display">00:00</span>
+                                    <span class="duration-display">--:--</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden cursor-pointer progress-container hover-target">
+                                    <div class="h-full bg-gold w-0 progress-bar transition-all duration-100 ease-linear pointer-events-none"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-xs uppercase tracking-widest text-grayLight/50 mb-3 font-sans pb-2 border-b border-white/5 flex justify-between">
+                            <span>Tracklist</span>
+                            <span>Playing: <span class="text-gold current-track-name">Descent</span></span>
+                        </div>
+                        <ul class="flex flex-col gap-1 font-sans text-sm h-32 overflow-y-auto playlist-scroll pr-2 tracklist">
+                            <li class="p-2 rounded flex justify-between items-center text-grayLight cursor-pointer hover:bg-white/5 hover:text-white transition-colors hover-target track-item" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3">
+                                <div class="flex items-center gap-3"><span class="text-xs opacity-50 w-4">01</span> <span class="track-title">Descent</span></div>
+                                <div class="playing-indicator hidden items-end h-3"><span></span><span></span><span></span></div>
+                            </li>
+                            <li class="p-2 rounded flex justify-between items-center text-grayLight cursor-pointer hover:bg-white/5 hover:text-white transition-colors hover-target track-item" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3">
+                                <div class="flex items-center gap-3"><span class="text-xs opacity-50 w-4">02</span> <span class="track-title">Midnight Zone</span></div>
+                                <div class="playing-indicator hidden items-end h-3"><span></span><span></span><span></span></div>
+                            </li>
+                            <li class="p-2 rounded flex justify-between items-center text-grayLight cursor-pointer hover:bg-white/5 hover:text-white transition-colors hover-target track-item" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3">
+                                <div class="flex items-center gap-3"><span class="text-xs opacity-50 w-4">03</span> <span class="track-title">Bioluminescence</span></div>
+                                <div class="playing-indicator hidden items-end h-3"><span></span><span></span><span></span></div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Services / Skills -->
+    <section id="services" class="py-32 bg-dark relative border-y border-white/5">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-20 reveal-section">
+                <h2 class="font-cinematic text-4xl md:text-5xl text-white mb-4">Areas of <span class="text-gold italic font-serif">Expertise</span></h2>
+                <p class="font-sans text-grayLight tracking-widest text-sm uppercase">Professional Services</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-panel p-10 hover:border-gold/30 transition-colors duration-500 group reveal-section hover-target">
+                    <iconify-icon icon="ph:film-strip-light" width="48" class="text-gold mb-6 group-hover:scale-110 transition-transform"></iconify-icon>
+                    <h3 class="font-cinematic text-xl text-white mb-3">Film Scoring</h3>
+                    <h4 class="font-sans text-xs text-gold uppercase tracking-widest mb-4">Original Soundtracks</h4>
+                    <p class="font-sans text-grayLight text-sm leading-relaxed font-light">
+                        Providing complete score production for features, shorts, and documentaries. From orchestral arrangements to modern electronics, I precisely capture the emotional and narrative rhythm.
+                    </p>
+                </div>
+                
+                <div class="glass-panel p-10 hover:border-gold/30 transition-colors duration-500 group reveal-section hover-target">
+                    <iconify-icon icon="ph:sliders-horizontal-light" width="48" class="text-gold mb-6 group-hover:scale-110 transition-transform"></iconify-icon>
+                    <h3 class="font-cinematic text-xl text-white mb-3">Music Production</h3>
+                    <h4 class="font-sans text-xs text-gold uppercase tracking-widest mb-4">Arranging & Direction</h4>
+                    <p class="font-sans text-grayLight text-sm leading-relaxed font-light">
+                        Acting as a music director for singles or albums, covering everything from arranging and recording supervision to mixing consultation, delivering industry-standard sound.
+                    </p>
+                </div>
+
+                <div class="glass-panel p-10 hover:border-gold/30 transition-colors duration-500 group reveal-section hover-target">
+                    <iconify-icon icon="ph:wave-sawtooth-light" width="48" class="text-gold mb-6 group-hover:scale-110 transition-transform"></iconify-icon>
+                    <h3 class="font-cinematic text-xl text-white mb-3">Sound Design</h3>
+                    <h4 class="font-sans text-xs text-gold uppercase tracking-widest mb-4">Audio Engineering</h4>
+                    <p class="font-sans text-grayLight text-sm leading-relaxed font-light">
+                        Specializing in synthesizer modulation and sound sampling, creating unique, avant-garde auditory experiences for games, experimental films, or brand commercials.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact CTA -->
+    <section id="contact" class="py-40 bg-darker relative overflow-hidden flex items-center justify-center text-center">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-metallic-glow pointer-events-none"></div>
+            <img src="https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?q=80&w=2070&auto=format&fit=crop" alt="Piano Keys" class="w-full h-full object-cover opacity-10 mix-blend-overlay">
+        </div>
+        <div class="relative z-10 max-w-3xl px-6 reveal-section">
+            <h2 class="font-cinematic text-5xl md:text-7xl text-white mb-6">Let's Create <br><span class="italic font-serif text-gold">Something Epic.</span></h2>
+            <p class="font-sans text-grayLight mb-12 text-lg font-light">Ready to inject a breathtaking auditory soul into your next project?</p>
+            <a href="mailto:hello@ianmusic.com" class="hover-target inline-flex items-center gap-4 px-10 py-5 bg-gold text-dark font-sans tracking-widest text-sm uppercase hover:bg-goldLight transition-colors font-semibold">
+                Start a Project
+                <iconify-icon icon="ph:envelope-simple-light" width="20"></iconify-icon>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-darker py-10 border-t border-white/5 text-center">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p class="font-sans text-grayLight text-xs tracking-widest uppercase cursor-pointer hover:text-white transition-colors" onclick="toggleAdmin()">&copy; 2026 Ian Music. <span class="text-gold ml-2 hover-target">[ Admin CMS ]</span></p>
+            <div class="flex gap-6 text-grayLight">
+                <a href="#" class="hover:text-gold transition-colors hover-target"><iconify-icon icon="ph:instagram-logo-light" width="24"></iconify-icon></a>
+                <a href="#" class="hover:text-gold transition-colors hover-target"><iconify-icon icon="ph:spotify-logo-light" width="24"></iconify-icon></a>
+                <a href="#" class="hover:text-gold transition-colors hover-target"><iconify-icon icon="ph:soundcloud-logo-light" width="24"></iconify-icon></a>
+                <a href="#" class="hover:text-gold transition-colors hover-target"><iconify-icon icon="ph:imdb-logo-light" width="24"></iconify-icon></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Admin Login Modal -->
+    <div id="login-modal" class="fixed inset-0 z-[99999] bg-darker/95 backdrop-blur-xl hidden flex-col opacity-0 transition-opacity duration-300 justify-center items-center">
+        <div class="glass-panel p-10 rounded-lg max-w-sm w-full mx-4 border border-white/10 relative shadow-2xl">
+            <button onclick="closeLogin()" class="absolute top-4 right-4 text-grayLight hover:text-white transition-colors hover-target">
+                <iconify-icon icon="ph:x-light" width="20"></iconify-icon>
+            </button>
+            <h2 class="text-2xl font-cinematic text-gold tracking-widest text-center mb-8">ADMIN LOGIN</h2>
+            <div class="flex flex-col gap-4 font-sans">
+                <div>
+                    <label class="text-grayLight text-xs uppercase tracking-wider mb-2 block">Username</label>
+                    <input type="text" id="login-username" class="w-full bg-dark/50 border border-white/10 rounded p-3 text-white text-sm focus:outline-none focus:border-gold">
+                </div>
+                <div>
+                    <label class="text-grayLight text-xs uppercase tracking-wider mb-2 block">Password</label>
+                    <input type="password" id="login-password" class="w-full bg-dark/50 border border-white/10 rounded p-3 text-white text-sm focus:outline-none focus:border-gold" onkeypress="if(event.key === 'Enter') handleLogin()">
+                </div>
+                <button id="btn-login" onclick="handleLogin()" class="hover-target w-full mt-4 py-3 bg-gold text-dark font-semibold tracking-widest uppercase text-sm hover:bg-goldLight transition-colors rounded">Verify Access</button>
+                <p id="login-error" class="text-red-500 text-xs text-center mt-2 hidden">Access Denied: 帳號或密碼錯誤</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin CMS Dashboard Modal -->
+    <div id="admin-panel" class="fixed inset-0 z-[99999] bg-darker/95 backdrop-blur-xl hidden flex-col opacity-0 transition-opacity duration-300">
+        <div class="p-6 border-b border-white/10 flex justify-between items-center bg-dark">
+            <h2 class="text-2xl font-cinematic text-gold tracking-widest">IAN MUSIC | <span class="text-white text-lg">CMS</span></h2>
+            <div class="flex items-center gap-6">
+                <button onclick="handleLogout()" class="text-gold hover:text-white transition-colors text-xs uppercase tracking-widest font-sans flex items-center gap-1 hover-target">
+                    <iconify-icon icon="ph:sign-out-light"></iconify-icon> Logout
+                </button>
+                <button onclick="toggleAdmin()" class="text-grayLight hover:text-white transition-colors text-sm uppercase tracking-widest font-sans flex items-center gap-2 hover-target">
+                    Close <iconify-icon icon="ph:x-light" width="20"></iconify-icon>
+                </button>
+            </div>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-8 font-sans">
+            <div class="max-w-3xl mx-auto flex flex-col gap-10">
+                <!-- Hero Settings -->
+                <div class="glass-panel p-8 rounded-lg border border-white/10">
+                    <h3 class="text-gold tracking-widest uppercase text-sm mb-6 border-b border-white/10 pb-3 flex items-center gap-2"><iconify-icon icon="ph:image-light" width="18"></iconify-icon> 首頁背景設定 (Hero Background)</h3>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-grayLight text-xs uppercase tracking-wider">更換首頁背景圖片</label>
+                        <input type="file" id="admin-hero-bg" accept="image/*" class="w-full text-sm text-grayLight file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gold file:text-dark hover:file:bg-goldLight transition-all cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- About Settings -->
+                <div class="glass-panel p-8 rounded-lg border border-white/10">
+                    <h3 class="text-gold tracking-widest uppercase text-sm mb-6 border-b border-white/10 pb-3 flex items-center gap-2"><iconify-icon icon="ph:user-light" width="18"></iconify-icon> 個人簡介設定 (About)</h3>
+                    <div class="flex flex-col gap-6">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-grayLight text-xs uppercase tracking-wider">更換個人照片</label>
+                            <input type="file" id="admin-about-img" accept="image/*" class="w-full text-sm text-grayLight file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gold file:text-dark hover:file:bg-goldLight cursor-pointer">
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-grayLight text-xs uppercase tracking-wider">修改簡介文字</label>
+                            <textarea id="admin-about-text" rows="5" class="w-full bg-dark/50 border border-white/10 rounded p-4 text-white text-sm focus:outline-none focus:border-gold transition-colors" placeholder="輸入新的簡介..."></textarea>
+                            <button id="btn-save-about" onclick="updateAboutText()" class="mt-2 px-6 py-2 bg-transparent border border-gold text-gold hover:bg-gold hover:text-dark transition-colors text-xs tracking-widest uppercase w-max rounded hover-target">儲存文字</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Portfolio Works Settings -->
+                <div class="glass-panel p-8 rounded-lg border border-white/10">
+                    <h3 class="text-gold tracking-widest uppercase text-sm mb-6 border-b border-white/10 pb-3 flex items-center gap-2"><iconify-icon icon="ph:music-notes-light" width="18"></iconify-icon> 新增獨立作品與音軌 (Add Work)</h3>
+                    <p class="text-xs text-grayLight mb-4">注意：此功能為本地預覽，若需支援多首曲目上傳，需後端對應支援 Array of Audio Files。</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-grayLight text-xs uppercase tracking-wider">作品標題</label>
+                            <input type="text" id="admin-work-title" class="w-full bg-dark/50 border border-white/10 rounded p-3 text-white text-sm focus:outline-none focus:border-gold" placeholder="例如：The Silent Echo">
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-grayLight text-xs uppercase tracking-wider">分類 / 類型</label>
+                            <input type="text" id="admin-work-category" class="w-full bg-dark/50 border border-white/10 rounded p-3 text-white text-sm focus:outline-none focus:border-gold" placeholder="例如：Psychological Drama">
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-grayLight text-xs uppercase tracking-wider">作品封面圖 (必填)</label>
+                            <input type="file" id="admin-work-img" accept="image/*" class="w-full text-sm text-grayLight file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer">
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-grayLight text-xs uppercase tracking-wider">上傳主打音檔 (選填)</label>
+                            <input type="file" id="admin-work-audio" accept="audio/*" class="w-full text-sm text-grayLight file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer">
+                        </div>
+                    </div>
+                    <button id="btn-submit-work" onclick="addNewWork()" class="w-full py-3 bg-gold text-dark font-semibold tracking-widest uppercase text-sm hover:bg-goldLight transition-colors rounded hover-target">發佈新作品 (Upload to API)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // ==========================================
+        // 1. Independent Local Audio Players Logic
+        // ==========================================
+        
+        let currentlyPlayingAudio = null;
+        let currentlyPlayingBtnIcon = null;
+        let currentlyPlayingIndicator = null;
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "00:00";
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function initLocalPlayers() {
+            const playerCards = document.querySelectorAll('.local-player-card');
+            
+            playerCards.forEach(card => {
+                const audio = card.querySelector('.local-audio');
+                const playPauseBtn = card.querySelector('.play-pause-btn');
+                const btnIcon = playPauseBtn.querySelector('iconify-icon');
+                const progressContainer = card.querySelector('.progress-container');
+                const progressBar = card.querySelector('.progress-bar');
+                const timeDisplay = card.querySelector('.current-time-display');
+                const durationDisplay = card.querySelector('.duration-display');
+                const tracklistItems = card.querySelectorAll('.track-item');
+                const currentTrackNameDisplay = card.querySelector('.current-track-name');
+
+                // Initialize first track if exists
+                if (tracklistItems.length > 0) {
+                    const firstTrack = tracklistItems[0];
+                    audio.src = firstTrack.getAttribute('data-src');
+                    firstTrack.classList.add('text-gold');
+                    firstTrack.classList.remove('text-grayLight');
+                    currentTrackNameDisplay.innerText = firstTrack.querySelector('.track-title').innerText;
+                }
+
+                // Handle Audio Metadata Load
+                audio.addEventListener('loadedmetadata', () => {
+                    durationDisplay.innerText = formatTime(audio.duration);
+                });
+
+                // Handle Audio Time Update
+                audio.addEventListener('timeupdate', () => {
+                    timeDisplay.innerText = formatTime(audio.currentTime);
+                    if (audio.duration) {
+                        const percent = (audio.currentTime / audio.duration) * 100;
+                        progressBar.style.width = `${percent}%`;
+                    }
+                });
+
+                // Handle Progress Bar Click
+                progressContainer.addEventListener('click', (e) => {
+                    const rect = progressContainer.getBoundingClientRect();
+                    const pos = (e.clientX - rect.left) / rect.width;
+                    audio.currentTime = pos * audio.duration;
+                });
+
+                // Handle Audio End (Auto play next)
+                audio.addEventListener('ended', () => {
+                    let nextTrack = null;
+                    for (let i = 0; i < tracklistItems.length; i++) {
+                        if (tracklistItems[i].classList.contains('text-gold')) {
+                            if (i + 1 < tracklistItems.length) nextTrack = tracklistItems[i + 1];
+                            break;
+                        }
+                    }
+                    if (nextTrack) {
+                        nextTrack.click();
+                    } else {
+                        btnIcon.setAttribute('icon', 'ph:play-circle-fill');
+                        if (currentlyPlayingIndicator) currentlyPlayingIndicator.classList.add('hidden');
+                        progressBar.style.width = `0%`;
+                    }
+                });
+
+                // Play / Pause Button Logic
+                playPauseBtn.addEventListener('click', () => {
+                    if (audio.paused) {
+                        // Pause currently playing audio globally
+                        if (currentlyPlayingAudio && currentlyPlayingAudio !== audio) {
+                            currentlyPlayingAudio.pause();
+                            if(currentlyPlayingBtnIcon) currentlyPlayingBtnIcon.setAttribute('icon', 'ph:play-circle-fill');
+                            if(currentlyPlayingIndicator) currentlyPlayingIndicator.classList.add('hidden');
+                        }
+
+                        audio.play();
+                        btnIcon.setAttribute('icon', 'ph:pause-circle-fill');
+                        currentlyPlayingAudio = audio;
+                        currentlyPlayingBtnIcon = btnIcon;
+
+                        // Show indicator on active track
+                        const activeTrack = card.querySelector('.track-item.text-gold');
+                        if (activeTrack) {
+                            const indicator = activeTrack.querySelector('.playing-indicator');
+                            if (indicator) {
+                                indicator.classList.remove('hidden');
+                                currentlyPlayingIndicator = indicator;
+                            }
+                        }
+
+                    } else {
+                        audio.pause();
+                        btnIcon.setAttribute('icon', 'ph:play-circle-fill');
+                        if (currentlyPlayingIndicator) currentlyPlayingIndicator.classList.add('hidden');
+                    }
+                });
+
+                // Tracklist Click Logic
+                tracklistItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        const src = item.getAttribute('data-src');
+                        const title = item.querySelector('.track-title').innerText;
+                        
+                        // Check if clicking the same track
+                        if (audio.src.endsWith(src)) {
+                            playPauseBtn.click(); // Toggle play/pause
+                            return;
+                        }
+
+                        // Reset styles for all tracks in this card
+                        tracklistItems.forEach(li => {
+                            li.classList.remove('text-gold');
+                            li.classList.add('text-grayLight');
+                            const ind = li.querySelector('.playing-indicator');
+                            if (ind) ind.classList.add('hidden');
+                        });
+
+                        // Set active style
+                        item.classList.add('text-gold');
+                        item.classList.remove('text-grayLight');
+                        currentTrackNameDisplay.innerText = title;
+
+                        // Play the selected track
+                        audio.src = src;
+                        
+                        if (currentlyPlayingAudio && currentlyPlayingAudio !== audio) {
+                            currentlyPlayingAudio.pause();
+                            if(currentlyPlayingBtnIcon) currentlyPlayingBtnIcon.setAttribute('icon', 'ph:play-circle-fill');
+                            if(currentlyPlayingIndicator) currentlyPlayingIndicator.classList.add('hidden');
+                        }
+
+                        audio.play();
+                        btnIcon.setAttribute('icon', 'ph:pause-circle-fill');
+                        currentlyPlayingAudio = audio;
+                        currentlyPlayingBtnIcon = btnIcon;
+
+                        const indicator = item.querySelector('.playing-indicator');
+                        if (indicator) {
+                            indicator.classList.remove('hidden');
+                            currentlyPlayingIndicator = indicator;
+                        }
+                    });
+                });
+            });
+        }
+
+        // Initialize players on load
+        window.addEventListener('DOMContentLoaded', initLocalPlayers);
+
+
+        // ==========================================
+        // 2. CMS & Admin Logic
+        // ==========================================
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        function toggleAdmin() {
+            const token = localStorage.getItem('adminToken');
+            const panel = document.getElementById('admin-panel');
+            const loginModal = document.getElementById('login-modal');
+
+            if (panel.classList.contains('hidden')) {
+                if (!token) {
+                    loginModal.classList.remove('hidden');
+                    setTimeout(() => loginModal.classList.remove('opacity-0'), 10);
+                } else {
+                    panel.classList.remove('hidden');
+                    setTimeout(() => panel.classList.remove('opacity-0'), 10);
+                }
+            } else {
+                panel.classList.add('opacity-0');
+                setTimeout(() => panel.classList.add('hidden'), 300);
+            }
+        }
+
+        function closeLogin() {
+            const loginModal = document.getElementById('login-modal');
+            loginModal.classList.add('opacity-0');
+            setTimeout(() => loginModal.classList.add('hidden'), 300);
+            document.getElementById('login-error').classList.add('hidden');
+        }
+
+        async function handleLogin() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('btn-login');
+            const errorMsg = document.getElementById('login-error');
+
+            if (!username || !password) return;
+
+            btn.innerText = 'Verifying...';
+            errorMsg.classList.add('hidden');
+
+            try {
+                if (username === '1234' && password === '1234') {
+                    localStorage.setItem('adminToken', 'simulated_jwt_token_for_preview');
+                    closeLogin();
+                    setTimeout(() => {
+                        const panel = document.getElementById('admin-panel');
+                        panel.classList.remove('hidden');
+                        setTimeout(() => panel.classList.remove('opacity-0'), 10);
+                    }, 300);
+                } else {
+                    throw new Error('帳號或密碼錯誤');
+                }
+            } catch (error) {
+                errorMsg.classList.remove('hidden');
+            } finally {
+                btn.innerText = 'Verify Access';
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('adminToken');
+            toggleAdmin(); 
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+        }
+
+        document.getElementById('admin-hero-bg').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            document.querySelector('#hero-bg img').src = URL.createObjectURL(file);
+        });
+
+        document.getElementById('admin-about-img').addEventListener('change', function(e) {
+            if(e.target.files[0]) {
+                document.querySelector('#about img:not(.mix-blend-screen)').src = URL.createObjectURL(e.target.files[0]);
+            }
+        });
+
+        async function updateAboutText() {
+            const newText = document.getElementById('admin-about-text').value;
+            const btn = document.getElementById('btn-save-about');
+            if (newText.trim() === '') return;
+
+            btn.innerText = '儲存中...';
+            try {
+                const pElements = document.querySelectorAll('#about p');
+                if(pElements.length > 0) pElements[0].innerText = newText;
+                alert('簡介文字已更新！');
+            } catch (err) {
+                console.error(err);
+            } finally {
+                btn.innerText = '儲存文字';
+            }
+        }
+
+        async function addNewWork() {
+            const title = document.getElementById('admin-work-title').value;
+            const category = document.getElementById('admin-work-category').value;
+            const imgFile = document.getElementById('admin-work-img').files[0];
+            const audioFile = document.getElementById('admin-work-audio').files[0];
+            const btn = document.getElementById('btn-submit-work');
+
+            if (!title || !category || !imgFile) {
+                alert('標題、分類與封面圖為必填項目！');
+                return;
+            }
+
+            btn.innerText = '上傳檔案中... (Uploading)';
+            
+            try {
+                const imgUrl = URL.createObjectURL(imgFile);
+                const audioUrl = audioFile ? URL.createObjectURL(audioFile) : '';
+
+                renderSingleWorkCard({ title, category, coverImage: imgUrl, audioUrl: audioUrl });
+                
+                document.getElementById('admin-work-title').value = '';
+                document.getElementById('admin-work-category').value = '';
+                toggleAdmin(); 
+                
+            } catch (error) {
+                console.error('執行失敗:', error);
+            } finally {
+                btn.innerText = '發佈新作品 (Upload to API)';
+            }
+        }
+
+        function renderSingleWorkCard(work) {
+            const grid = document.getElementById('works-grid');
+            const newId = 'card-' + Date.now();
+            
+            const newCardHTML = `
+                <div class="glass-panel border border-white/10 rounded-sm flex flex-col overflow-hidden reveal-section group local-player-card" id="${newId}">
+                    <div class="relative aspect-[4/3] overflow-hidden">
+                        <img src="${work.coverImage}" alt="${work.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
+                        <div class="absolute bottom-4 left-6 right-6">
+                            <p class="font-sans text-gold text-xs tracking-widest uppercase mb-1">${work.category}</p>
+                            <h3 class="font-cinematic text-2xl text-white">${work.title}</h3>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-darker flex-1 flex flex-col justify-between">
+                        <audio class="hidden local-audio" preload="metadata"></audio>
+                        
+                        <div class="flex items-center gap-4 mb-6">
+                            <button class="play-pause-btn text-white hover:text-gold transition-colors scale-110 hover-target">
+                                <iconify-icon icon="ph:play-circle-fill" width="36"></iconify-icon>
+                            </button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between text-[10px] text-grayLight mb-1.5 font-sans tracking-wider">
+                                    <span class="current-time-display">00:00</span>
+                                    <span class="duration-display">--:--</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden cursor-pointer progress-container hover-target">
+                                    <div class="h-full bg-gold w-0 progress-bar transition-all duration-100 ease-linear pointer-events-none"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-xs uppercase tracking-widest text-grayLight/50 mb-3 font-sans pb-2 border-b border-white/5 flex justify-between">
+                            <span>Tracklist</span>
+                            <span>Playing: <span class="text-gold current-track-name">${work.audioUrl ? 'Main Theme' : 'No Track'}</span></span>
+                        </div>
+                        <ul class="flex flex-col gap-1 font-sans text-sm h-32 overflow-y-auto playlist-scroll pr-2 tracklist">
+                            ${work.audioUrl ? `
+                            <li class="p-2 rounded flex justify-between items-center text-grayLight cursor-pointer hover:bg-white/5 hover:text-white transition-colors hover-target track-item" data-src="${work.audioUrl}">
+                                <div class="flex items-center gap-3"><span class="text-xs opacity-50 w-4">01</span> <span class="track-title">Main Theme</span></div>
+                                <div class="playing-indicator hidden items-end h-3"><span></span><span></span><span></span></div>
+                            </li>
+                            ` : '<li class="text-grayLight text-xs italic">無上傳音檔</li>'}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            grid.insertAdjacentHTML('afterbegin', newCardHTML);
+            
+            // Initialize the player for the new card specifically
+            setTimeout(() => { 
+                ScrollTrigger.refresh(); 
+                bindCursorHover(); // re-bind cursor for new elements
+                
+                // Hacky way to init the specific new player
+                initLocalPlayers(); 
+            }, 100);
+        }
+
+        // ==========================================
+        // 3. UI Interactions & Animations
+        // ==========================================
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorRing = document.getElementById('cursor-ring');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursorDot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+            setTimeout(() => { cursorRing.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`; }, 50);
+        });
+
+        const bindCursorHover = () => {
+            document.querySelectorAll('.hover-target, a, button').forEach(target => {
+                target.addEventListener('mouseenter', () => {
+                    cursorDot.style.opacity = '0';
+                    cursorRing.style.width = '50px';
+                    cursorRing.style.height = '50px';
+                    cursorRing.style.borderColor = '#C5A059';
+                    cursorRing.style.backgroundColor = 'rgba(197, 160, 89, 0.1)';
+                    cursorRing.style.backdropFilter = 'blur(2px)';
+                });
+                target.addEventListener('mouseleave', () => {
+                    cursorDot.style.opacity = '1';
+                    cursorRing.style.width = '32px';
+                    cursorRing.style.height = '32px';
+                    cursorRing.style.borderColor = 'rgba(197, 160, 89, 0.5)';
+                    cursorRing.style.backgroundColor = 'transparent';
+                    cursorRing.style.backdropFilter = 'none';
+                });
+            });
+        };
+        bindCursorHover();
+
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-dark/90');
+                navbar.classList.remove('glass-panel');
+                navbar.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+            } else {
+                navbar.classList.remove('bg-dark/90');
+                navbar.classList.add('glass-panel');
+                navbar.style.borderBottom = 'none';
+            }
+        });
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        const splitTexts = document.querySelectorAll('.split-text');
+        splitTexts.forEach(el => {
+            const text = el.innerText.trim();
+            el.innerHTML = '';
+            text.split('').forEach(char => {
+                if (char === ' ') el.innerHTML += `<span class="split-word">&nbsp;</span>`;
+                else el.innerHTML += `<span class="split-word"><span class="split-char">${char}</span></span>`;
+            });
+        });
+
+        const heroTl = gsap.timeline();
+        // 修改這裡：加入從模糊 (blur) 與全透明 (opacity: 0) 緩慢對焦浮現的電影效果
+        heroTl.fromTo('#hero-bg img', 
+            { scale: 1.1, opacity: 0, filter: 'blur(10px)' }, 
+            { scale: 1, opacity: 0.6, filter: 'blur(0px)', duration: 3.5, ease: 'power2.out' }, 0)
+        .to('.split-char', { y: '0%', opacity: 1, stagger: 0.03, duration: 1.2, ease: 'power4.out' }, 0.5)
+        .fromTo('.hero-gradient', { opacity: 0 }, { opacity: 1, duration: 2 }, 0);
+
+        document.querySelectorAll('.reveal-section').forEach(section => {
+            gsap.to(section, {
+                scrollTrigger: { trigger: section, start: 'top 85%', toggleActions: 'play none none reverse' },
+                opacity: 1, y: 0, duration: 1, ease: 'power3.out'
+            });
+        });
+
+    </script>
+</body>
+</html>
