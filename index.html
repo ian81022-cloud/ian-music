@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ian | Film Composer & Music Director</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0D0D12',
+                        darker: '#08080A',
+                        gold: '#C5A059',
+                        goldLight: '#E8D3A2',
+                        grayLight: '#A0A0A5'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Lora', 'serif'],
+                        cinematic: ['Marcellus', 'serif'],
+                    },
+                    backgroundImage: {
+                        'hero-gradient': 'linear-gradient(to top, #0D0D12 0%, rgba(13, 13, 18, 0.7) 40%, rgba(13, 13, 18, 0.2) 100%)',
+                        'metallic-glow': 'radial-gradient(circle at center, rgba(197, 160, 89, 0.15) 0%, transparent 70%)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Iconify -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        body { background-color: #0D0D12; color: #F8FAFC; overflow-x: hidden; }
+        
+        .noise-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 9998; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .split-word { display: inline-block; overflow: hidden; vertical-align: bottom; }
+        .split-char { display: inline-block; transform: translateY(100%); opacity: 0; }
+        
+        /* 隱藏未觸發動畫的區塊 */
+        .reveal-section { opacity: 0; transform: translateY(40px); }
+        
+        /* 滾動條樣式 */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(197, 160, 89, 0.3); border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(197, 160, 89, 0.6); }
+
+        /* 動態指標 */
+        .playing-indicator span {
+            display: inline-block; width: 3px; background-color: #C5A059; border-radius: 2px; margin: 0 1px; animation: bounce 1s infinite ease-in-out;
+        }
+        .playing-indicator span:nth-child(1) { animation-delay: 0s; height: 8px; }
+        .playing-indicator span:nth-child(2) { animation-delay: 0.2s; height: 14px; }
+        .playing-indicator span:nth-child(3) { animation-delay: 0.4s; height: 10px; }
+        @keyframes bounce { 0%, 100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
+
+        /* 轉場動畫 */
+        #transition-container { position: fixed; inset: 0; z-index: 99990; pointer-events: none; display: flex; }
+        .transition-column { flex: 1; background: #0D0D12; transform: scaleY(0); transform-origin: top; }
+        
+        /* 表單樣式 */
+        .admin-input { transition: all 0.3s ease; }
+        .admin-input:focus { border-color: #C5A059; box-shadow: 0 0 10px rgba(197, 160, 89, 0.2); outline: none; }
+    </style>
+</head>
+<body class="antialiased selection:bg-gold selection:text-dark">
+
+    <div class="noise-overlay"></div>
+
+    <div id="transition-container">
+        <div class="transition-column"></div><div class="transition-column"></div>
+        <div class="transition-column"></div><div class="transition-column"></div>
+        <div class="transition-column"></div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 首頁視圖 (Main View) -->
+    <!-- ============================================== -->
+    <main id="home-view">
+        <nav class="fixed w-full z-50 top-0 transition-all duration-500 glass-panel" id="navbar">
+            <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+                <a href="#" class="text-2xl font-cinematic font-bold tracking-widest text-gold">IAN</a>
+                <div class="hidden md:flex gap-8 items-center text-sm tracking-widest font-sans uppercase">
+                    <a href="#about" class="text-grayLight hover:text-white transition-colors cursor-pointer">About</a>
+                    <a href="javascript:void(0)" onclick="navigateToCatalog()" class="text-grayLight hover:text-white transition-colors cursor-pointer">Works</a>
+                    <a href="#services" class="text-grayLight hover:text-white transition-colors cursor-pointer">Services</a>
+                    <a href="#contact" class="px-5 py-2 border border-gold/40 text-gold hover:bg-gold hover:text-dark transition-all duration-300 cursor-pointer">Contact</a>
+                </div>
+                <button class="md:hidden text-gold">
+                    <iconify-icon icon="mingcute:menu-fill" width="28"></iconify-icon>
+                </button>
+            </div>
+        </nav>
+        
+        <!-- 首頁背景照 -->
+        <section class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+            <div class="absolute inset-0 z-0" id="hero-bg">
+                <img src="Gemini_BK_image.jpg" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2070&auto=format&fit=crop';" alt="Recording Studio" class="w-full h-full object-cover object-center scale-105 opacity-60">
+            </div>
+            <div class="absolute inset-0 z-0 hero-gradient"></div>
+            <div class="absolute inset-0 z-0 bg-dark/60"></div>
+            <div class="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,rgba(13,13,18,0.5)_0%,transparent_60%)]"></div>
+
+            <div class="relative z-10 text-center max-w-4xl px-4 flex flex-col items-center mt-16">
+                <p class="font-sans text-goldLight tracking-[0.3em] pl-[0.3em] uppercase text-xs md:text-sm mb-6 split-text">Film Composer & Music Director</p>
+                <h1 class="font-cinematic text-5xl md:text-7xl lg:text-9xl tracking-[0.25em] pl-[0.25em] mb-6 text-goldLight drop-shadow-[0_0_25px_rgba(197,160,89,0.6)] leading-tight split-text">IAN</h1>
+                <div class="flex items-center justify-center gap-4 mb-10 font-serif italic text-lg md:text-2xl text-grayLight">
+                    <span class="split-text">Epic Orchestral</span><span class="text-gold opacity-50 px-2">|</span>
+                    <span class="split-text">Experimental Sound</span><span class="text-gold opacity-50 px-2">|</span>
+                    <span class="split-text">Narrative Tension</span>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-6 mt-4">
+                    <button onclick="navigateToCatalog()" class="group relative px-10 py-5 bg-transparent border border-gold text-gold font-sans tracking-widest text-sm uppercase overflow-hidden transition-all hover:text-dark cursor-pointer">
+                        <div class="absolute inset-0 bg-gold translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-0"></div>
+                        <span class="relative z-10 flex items-center gap-2">Enter Catalog <iconify-icon icon="ph:arrow-right-light"></iconify-icon></span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 個人簡介照片 -->
+        <section id="about" class="py-32 bg-dark relative">
+            <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center reveal-section">
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-gold/20 translate-x-4 translate-y-4 group-hover:translate-x-6 group-hover:translate-y-6 transition-transform duration-500"></div>
+                    <img id="about-img-display" src="Gemini_Generated_Image_fuva5dfuva5dfuva.jpg" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1552422535-c45813c61732?q=80&w=2070&auto=format&fit=crop';" alt="Ian Chang" class="relative z-10 w-full h-[600px] object-cover grayscale hover:grayscale-0 transition-all duration-700 shadow-2xl">
+                </div>
+                <div>
+                    <h2 class="font-cinematic text-4xl md:text-5xl text-white mb-2 tracking-widest uppercase">Ian Chang</h2>
+                    <h3 class="font-sans text-gold tracking-[0.2em] text-xs md:text-sm uppercase mb-6 font-light">Netflix Series Composer & Music Director</h3>
+                    <div class="w-12 h-[1px] bg-gold mb-8 mt-6"></div>
+                    <div id="about-content-container">
+                        <p class="font-sans text-grayLight leading-relaxed mb-6 font-light text-sm md:text-base">
+                            Ian has participated in various domestic and international music productions, including scoring for the Netflix series <em class="text-white font-serif not-italic">The Accidental Influencer</em>, Encore Craft's musical <em class="text-white font-serif not-italic">Zeelandia</em>, music and sound design for the Tainan Art Museum's exhibition <em class="text-white font-serif not-italic">Golden Years: Where Art Resounds</em>, and composing the opening and closing theme music for the <em class="text-white font-serif not-italic">National Railway Museum</em>. Currently, he works at composer Ming-Hsueh Lin's company as an arranger, copyist, and production assistant.
+                        </p>
+                        <p class="font-sans text-grayLight leading-relaxed font-light mb-10 text-sm md:text-base">
+                            Specializing in blending electronic sound with orchestral music, Ian creates works with a strong sense of imagery and spatial depth. His style spans across diverse fields, including theater, film, exhibitions, and commercial brands. He continues to dedicate himself to teaching, scoring, and the practice of sound art.
+                        </p>
+                    </div>
+                    <button onclick="navigateToCatalog()" class="text-gold font-sans text-xs tracking-widest uppercase flex items-center gap-4 group cursor-pointer">
+                        Explore Full Works <div class="w-8 h-[1px] bg-gold group-hover:w-16 transition-all"></div>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="works" class="py-32 bg-darker relative border-y border-white/5">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="flex justify-between items-end mb-16 reveal-section">
+                    <div>
+                        <span class="font-sans text-gold tracking-[0.2em] text-sm uppercase mb-2 block">Selected Works</span>
+                        <h2 class="font-cinematic text-4xl md:text-5xl text-white">Cinematic <span class="italic font-serif text-grayLight">Scores</span></h2>
+                    </div>
+                    <button onclick="navigateToCatalog()" class="hidden md:flex items-center gap-2 text-gold font-sans text-sm tracking-widest uppercase hover:text-white transition-colors cursor-pointer">
+                        View Full Catalog <iconify-icon icon="ph:arrow-right-light"></iconify-icon>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" id="home-works-grid"></div>
+            </div>
+        </section>
+
+        <section id="services" class="py-32 bg-dark relative border-y border-white/5">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center mb-20 reveal-section">
+                    <h2 class="font-cinematic text-4xl md:text-5xl text-white mb-4">Areas of <span class="text-gold italic font-serif">Expertise</span></h2>
+                    <p class="font-sans text-grayLight tracking-widest text-sm uppercase">Professional Services</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-panel p-10 hover:border-gold/30 transition-colors duration-500 group reveal-section">
+                        <iconify-icon icon="ph:film-strip-light" width="48" class="text-gold mb-6 group-hover:scale-110 transition-transform"></iconify-icon>
+                        <h3 class="font-cinematic text-xl text-white mb-3">Film Scoring</h3>
+                        <h4 class="font-sans text-xs text-gold uppercase tracking-widest mb-4">Original Soundtracks</h4>
+                        <p class="font-sans text-grayLight text-sm leading-relaxed font-light">
+                            Providing complete score production for features, shorts, and documentaries. From orchestral arrangements to modern electronics, I precisely capture the emotional and narrative rhythm.
+                        </p>
+                    </div>
+                    
+                    <div class="glass-panel p-10 hover:border-gold/30 transition-colors duration-500 group reveal-section">
+                        <iconify-icon icon="ph:sliders-horizontal-light" width="48" class="text-gold mb-6 group-hover:scale-110 transition-transform"></iconify-icon>
+                        <h3 class="font-cinematic text-xl text-white mb-3">Music Production</h3>
+                        <h4 class="font-sans text-xs text-gold uppercase tracking-widest mb-4">Arranging & Direction</h4>
+                        <p class="font-sans text-grayLight text-sm leading-relaxed font-light">
+                            Acting as a music director for singles or albums, covering everything from arranging and recording supervision to mixing consultation, delivering industry-standard sound.
+                        </p>
+                    </div>
+
+                    <div class="glass-panel p-10 hover:border-gold/30 transition-colors duration-500 group reveal-section">
+                        <iconify-icon icon="ph:wave-sawtooth-light" width="48" class="text-gold mb-6 group-hover:scale-110 transition-transform"></iconify-icon>
+                        <h3 class="font-cinematic text-xl text-white mb-3">Sound Design</h3>
+                        <h4 class="font-sans text-xs text-gold uppercase tracking-widest mb-4">Audio Engineering</h4>
+                        <p class="font-sans text-grayLight text-sm leading-relaxed font-light">
+                            Specializing in synthesizer modulation and sound sampling, creating unique, avant-garde auditory experiences for games, experimental films, or brand commercials.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-40 bg-darker relative overflow-hidden flex items-center justify-center text-center">
+            <div class="absolute inset-0 z-0">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-metallic-glow pointer-events-none"></div>
+                <img src="https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?q=80&w=2070&auto=format&fit=crop" alt="Piano Keys" class="w-full h-full object-cover opacity-10 mix-blend-overlay">
+            </div>
+            <div class="relative z-10 max-w-3xl px-6 reveal-section">
+                <h2 id="contact-cta-display" class="font-cinematic text-5xl md:text-7xl text-white mb-12 leading-tight">Let's Create <br><span class="italic font-serif text-gold">Something Epic.</span></h2>
+                <a href="mailto:hello@ianmusic.com" class="inline-flex items-center gap-4 px-10 py-5 bg-gold text-dark font-sans tracking-widest text-sm uppercase hover:bg-goldLight transition-colors font-semibold cursor-pointer">
+                    Start a Project <iconify-icon icon="ph:envelope-simple-light" width="20"></iconify-icon>
+                </a>
+            </div>
+        </section>
+
+        <footer class="bg-darker py-10 border-t border-white/5 text-center">
+            <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="font-sans text-grayLight text-xs tracking-widest uppercase cursor-pointer hover:text-white transition-colors" onclick="toggleAdmin()">&copy; 2026 Ian Chang. <span class="text-gold ml-2">[ Dashboard ]</span></p>
+                <div class="flex gap-6 text-grayLight">
+                    <a href="#" target="_blank" class="hover:text-gold transition-colors"><iconify-icon icon="ph:instagram-logo-light" width="24"></iconify-icon></a>
+                    <a href="#" target="_blank" class="hover:text-gold transition-colors"><iconify-icon icon="ph:spotify-logo-light" width="24"></iconify-icon></a>
+                    <a href="#" target="_blank" class="hover:text-gold transition-colors"><iconify-icon icon="ph:soundcloud-logo-light" width="24"></iconify-icon></a>
+                    <a href="#" target="_blank" class="hover:text-gold transition-colors"><iconify-icon icon="ph:imdb-logo-light" width="24"></iconify-icon></a>
+                </div>
+            </div>
+        </footer>
+
+        <!-- 回到頂部按鈕 (Scroll to Top) -->
+        <button id="scroll-to-top" class="fixed bottom-8 right-8 z-[90] bg-gold text-dark p-3 rounded-full opacity-0 pointer-events-none transition-all duration-300 hover:bg-goldLight shadow-[0_0_15px_rgba(197,160,89,0.3)] flex items-center justify-center cursor-pointer hover:scale-110">
+            <iconify-icon icon="ph:arrow-up-bold" width="24"></iconify-icon>
+        </button>
+
+    </main>
+
+    <!-- ============================================== -->
+    <!-- 獨立作品大集頁面 (Catalog View) -->
+    <!-- ============================================== -->
+    <div id="catalog-view" class="fixed inset-0 bg-darker z-[60] hidden overflow-y-auto">
+        <header class="sticky top-0 z-10 glass-panel py-6">
+            <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+                <button onclick="backToHome()" class="flex items-center gap-3 text-gold font-sans text-xs tracking-widest uppercase group cursor-pointer">
+                    <iconify-icon icon="ph:arrow-left-light" class="group-hover:-translate-x-2 transition-transform"></iconify-icon>
+                    Return Home
+                </button>
+                <h2 class="font-cinematic text-xl text-white tracking-[0.4em]">WORKS CATALOGUE</h2>
+                <div class="w-32 hidden md:block"></div>
+            </div>
+        </header>
+
+        <section class="max-w-7xl mx-auto px-6 py-20">
+            <div class="mb-12">
+                <h1 class="font-cinematic text-5xl md:text-8xl text-white mb-6">Archive <span class="text-gold italic font-serif">Selected</span></h1>
+                <p class="text-grayLight font-sans tracking-[0.3em] uppercase text-xs opacity-60 mb-10">Complete Domestic & International Projects</p>
+            </div>
+            <!-- 目錄作品將由 JS 動態注入 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-20" id="catalog-grid"></div>
+        </section>
+        
+        <footer class="py-32 text-center opacity-20 flex flex-col items-center gap-4">
+            <div class="w-16 h-[1px] bg-gold"></div>
+            <p class="font-cinematic text-gold tracking-[0.5em] text-sm uppercase">Ian Music Production</p>
+        </footer>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 登入視窗 -->
+    <!-- ============================================== -->
+    <div id="login-modal" class="fixed inset-0 z-[200000] bg-darker/95 backdrop-blur-xl hidden flex-col opacity-0 transition-opacity duration-300 justify-center items-center">
+        <div class="glass-panel p-10 rounded-lg max-w-sm w-full mx-4 border border-white/10 relative shadow-2xl">
+            <button onclick="closeLogin()" class="absolute top-4 right-4 text-grayLight hover:text-white transition-colors cursor-pointer">
+                <iconify-icon icon="ph:x-light" width="20"></iconify-icon>
+            </button>
+            <h2 id="login-title" class="text-2xl font-cinematic text-gold tracking-widest text-center mb-8">SYSTEM LOGIN</h2>
+            <div class="flex flex-col gap-4 font-sans">
+                <div>
+                    <label class="text-grayLight text-xs uppercase tracking-wider mb-2 block">Username</label>
+                    <input type="text" id="login-username" class="admin-input w-full bg-dark/50 border border-white/10 rounded p-3 text-white text-sm" placeholder="admin">
+                </div>
+                <div>
+                    <label class="text-grayLight text-xs uppercase tracking-wider mb-2 block">Password</label>
+                    <input type="password" id="login-password" class="admin-input w-full bg-dark/50 border border-white/10 rounded p-3 text-white text-sm" onkeypress="if(event.key === 'Enter') handleLogin()" placeholder="••••••••">
+                </div>
+                <button id="btn-login" onclick="handleLogin()" class="w-full mt-4 py-3 bg-gold text-dark font-semibold tracking-widest uppercase text-sm hover:bg-goldLight transition-colors rounded cursor-pointer">Verify Access</button>
+                <p id="login-error" class="text-red-500 text-xs text-center mt-2 hidden">Access Denied: Incorrect Username or Password</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 全新專業級全螢幕 Dashboard -->
+    <!-- ============================================== -->
+    <div id="admin-dashboard" class="fixed inset-0 z-[100000] bg-darker text-white hidden flex-col md:flex-row overflow-hidden font-sans">
+        
+        <!-- 行動版頂部導覽列 -->
+        <div class="md:hidden flex justify-between items-center p-4 border-b border-white/5 bg-dark">
+            <h2 class="text-xl font-cinematic text-gold tracking-widest">IAN CMS</h2>
+            <button onclick="toggleMobileSidebar()" class="text-white cursor-pointer"><iconify-icon icon="ph:list" width="24"></iconify-icon></button>
+        </div>
+
+        <!-- 左側導覽欄 (Sidebar) -->
+        <aside id="admin-sidebar" class="w-64 border-r border-white/5 bg-dark flex-col justify-between flex-shrink-0 absolute md:relative z-20 h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300 md:flex hidden">
+            <div>
+                <div class="p-8 border-b border-white/5 hidden md:block">
+                    <h2 class="text-2xl font-cinematic text-gold tracking-widest">IAN <span class="text-white">CMS</span></h2>
+                    <p class="text-[10px] text-grayLight tracking-[0.2em] uppercase mt-2">Admin Dashboard</p>
+                </div>
+                <nav class="flex flex-col gap-2 p-4 mt-4">
+                    <button onclick="switchAdminTab('tab-dashboard', this)" class="admin-sidebar-btn flex items-center gap-3 w-full p-3 text-left text-sm tracking-wider uppercase text-gold bg-white/5 border-l-2 border-gold transition-all cursor-pointer">
+                        <iconify-icon icon="ph:squares-four-light" width="20"></iconify-icon> Overview
+                    </button>
+                    <button onclick="switchAdminTab('tab-works', this)" class="admin-sidebar-btn flex items-center gap-3 w-full p-3 text-left text-sm tracking-wider uppercase text-grayLight hover:text-gold hover:bg-white/5 transition-all border-l-2 border-transparent cursor-pointer">
+                        <iconify-icon icon="ph:music-notes-light" width="20"></iconify-icon> Works Manager
+                    </button>
+                    <button onclick="switchAdminTab('tab-content', this)" class="admin-sidebar-btn flex items-center gap-3 w-full p-3 text-left text-sm tracking-wider uppercase text-grayLight hover:text-gold hover:bg-white/5 transition-all border-l-2 border-transparent cursor-pointer">
+                        <iconify-icon icon="ph:browser-light" width="20"></iconify-icon> Site Content
+                    </button>
+                    <button onclick="switchAdminTab('tab-settings', this)" class="admin-sidebar-btn flex items-center gap-3 w-full p-3 text-left text-sm tracking-wider uppercase text-grayLight hover:text-gold hover:bg-white/5 transition-all border-l-2 border-transparent cursor-pointer">
+                        <iconify-icon icon="ph:gear-light" width="20"></iconify-icon> Settings
+                    </button>
+                </nav>
+            </div>
+            <div class="p-6 border-t border-white/5">
+                <button onclick="handleLogout()" class="flex items-center justify-center gap-2 w-full p-3 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white transition-all rounded text-sm tracking-widest uppercase cursor-pointer">
+                    <iconify-icon icon="ph:sign-out-light" width="18"></iconify-icon> Logout
+                </button>
+                <button onclick="toggleAdmin()" class="flex items-center justify-center gap-2 w-full p-3 mt-4 text-grayLight hover:text-white transition-all text-xs tracking-widest uppercase cursor-pointer">
+                    Return to Site
+                </button>
+            </div>
+            <!-- 手機版關閉按鈕 -->
+            <button onclick="toggleMobileSidebar()" class="md:hidden absolute top-4 right-4 text-grayLight hover:text-white cursor-pointer"><iconify-icon icon="ph:x-light" width="24"></iconify-icon></button>
+        </aside>
+        
+        <!-- 手機版遮罩 -->
+        <div id="mobile-sidebar-overlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 z-10 hidden md:hidden"></div>
+
+        <!-- 右側主內容區 -->
+        <main class="flex-1 h-full overflow-y-auto custom-scroll bg-gradient-to-br from-darker to-dark relative p-6 md:p-10 lg:p-16">
+            
+            <!-- Tab 1: Dashboard Overview -->
+            <section id="tab-dashboard" class="admin-tab-view">
+                <header class="mb-10">
+                    <h1 class="text-3xl font-cinematic text-white tracking-widest mb-2">Welcome Back.</h1>
+                    <p class="text-grayLight text-sm font-light">Here is what's happening with your portfolio today.</p>
+                </header>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                    <div class="glass-panel p-6 rounded-lg border border-white/5">
+                        <div class="flex justify-between items-start mb-4"><iconify-icon icon="ph:music-notes-plus" width="28" class="text-gold"></iconify-icon></div>
+                        <h3 class="text-3xl text-white font-cinematic mb-1" id="dash-total-works">--</h3>
+                        <p class="text-grayLight text-xs tracking-widest uppercase">Total Works</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-lg border border-white/5">
+                        <div class="flex justify-between items-start mb-4"><iconify-icon icon="ph:globe-hemisphere-west-light" width="28" class="text-green-400"></iconify-icon></div>
+                        <h3 class="text-3xl text-white font-cinematic mb-1" id="dash-pub-works">--</h3>
+                        <p class="text-grayLight text-xs tracking-widest uppercase">Published</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 2: Works Manager -->
+            <section id="tab-works" class="admin-tab-view hidden">
+                
+                <!-- 列表視圖 (List View) -->
+                <div id="admin-works-list-view">
+                    <header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 border-b border-white/5 pb-6 gap-4">
+                        <div>
+                            <h1 class="text-3xl font-cinematic text-white tracking-widest mb-2">Works Manager</h1>
+                            <p class="text-grayLight text-sm font-light">Manage your audio tracks and portfolio display.</p>
+                        </div>
+                        <button onclick="openWorkForm()" class="px-6 py-3 bg-gold text-dark font-semibold text-xs tracking-widest uppercase rounded hover:bg-goldLight transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer">
+                            <iconify-icon icon="ph:plus-bold"></iconify-icon> New Work
+                        </button>
+                    </header>
+                    <div class="glass-panel rounded-lg border border-white/5 overflow-x-auto">
+                        <table class="w-full text-left text-sm font-sans min-w-[600px]">
+                            <thead class="bg-black/40 text-xs uppercase tracking-widest text-grayLight border-b border-white/10">
+                                <tr>
+                                    <th class="p-4 font-medium">Cover</th>
+                                    <th class="p-4 font-medium">Title</th>
+                                    <th class="p-4 font-medium">Category</th>
+                                    <th class="p-4 font-medium">Date</th>
+                                    <th class="p-4 font-medium">Status</th>
+                                    <th class="p-4 font-medium text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-white divide-y divide-white/5" id="admin-works-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 編輯/新增視圖 (Form View) -->
+                <div id="admin-work-form-view" class="hidden">
+                    <header class="flex flex-col items-start mb-8 border-b border-white/5 pb-6">
+                        <button onclick="closeWorkForm()" class="text-gold hover:text-white mb-4 text-xs uppercase tracking-widest flex items-center gap-2 transition-colors cursor-pointer">
+                            <iconify-icon icon="ph:arrow-left-light"></iconify-icon> Back to List
+                        </button>
+                        <h1 id="form-title" class="text-3xl font-cinematic text-white tracking-widest">Publish New Project</h1>
+                    </header>
+                    <div class="glass-panel p-8 rounded-lg border border-gold/30">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-grayLight text-xs uppercase tracking-wider">Title *</label>
+                                <input type="text" id="admin-work-title" class="admin-input w-full bg-dark border border-white/10 rounded p-3 text-white text-sm" placeholder="e.g., The Silent Echo">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-grayLight text-xs uppercase tracking-wider">Category *</label>
+                                <input type="text" id="admin-work-category" class="admin-input w-full bg-dark border border-white/10 rounded p-3 text-white text-sm" placeholder="e.g., Netflix Series">
+                            </div>
+                            <div class="flex flex-col gap-2 md:col-span-2">
+                                <label class="text-grayLight text-xs uppercase tracking-wider">Cover Image</label>
+                                <input type="file" id="admin-work-img" accept="image/*" class="w-full text-sm text-grayLight file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer transition-colors">
+                            </div>
+                            
+                            <!-- 專案音軌管理區塊 (取代原先的單一音檔上傳) -->
+                            <div class="flex flex-col gap-2 md:col-span-2 border-t border-white/5 pt-6">
+                                <div class="flex justify-between items-end mb-2">
+                                    <div>
+                                        <h4 class="text-grayLight text-xs uppercase tracking-wider">Project Tracks (Audio Files)</h4>
+                                        <p class="text-[10px] text-grayLight/50 mt-1">為此專案新增多首配樂音軌</p>
+                                    </div>
+                                    <button type="button" onclick="addTrackInput()" class="text-gold text-xs border border-gold/50 px-3 py-2 rounded hover:bg-gold hover:text-dark transition-colors flex items-center gap-1 cursor-pointer">
+                                        <iconify-icon icon="ph:plus-bold"></iconify-icon> Add Track
+                                    </button>
+                                </div>
+                                <div id="admin-tracks-container" class="flex flex-col gap-3">
+                                    <!-- 動態生成的音軌列表會出現在這裡 -->
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col gap-2 md:col-span-2 border-t border-white/5 pt-6">
+                                <div class="flex items-center justify-between">
+                                    <div><h4 class="text-white text-sm tracking-wider">Visibility Status</h4></div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" checked id="admin-work-status">
+                                        <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <button id="btn-submit-work" onclick="saveWorkData()" class="px-8 py-3 bg-gold text-dark font-semibold text-xs tracking-widest uppercase rounded hover:bg-goldLight transition-colors cursor-pointer">Publish Project</button>
+                            <button onclick="closeWorkForm()" class="px-8 py-3 bg-transparent border border-white/20 text-white font-semibold text-xs tracking-widest uppercase rounded hover:bg-white/5 transition-colors cursor-pointer">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 3: Site Content -->
+            <section id="tab-content" class="admin-tab-view hidden">
+                <header class="mb-10 border-b border-white/5 pb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                    <div>
+                        <h1 class="text-3xl font-cinematic text-white tracking-widest mb-2">Site Content</h1>
+                        <p class="text-grayLight text-sm font-light">Customize text and images across your landing pages.</p>
+                    </div>
+                </header>
+
+                <div class="flex flex-col gap-8">
+                    <div class="glass-panel p-8 rounded-lg border border-white/5">
+                        <h2 class="text-lg font-cinematic text-gold tracking-widest mb-6 flex items-center gap-2"><iconify-icon icon="ph:image-light"></iconify-icon> Hero Section</h2>
+                        <div class="grid grid-cols-1 gap-6">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-grayLight text-xs uppercase tracking-wider">Main Background Image</label>
+                                <input type="file" id="admin-hero-bg" accept="image/*" class="w-full text-sm text-grayLight file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer transition-colors">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-8 rounded-lg border border-white/5">
+                        <h2 class="text-lg font-cinematic text-gold tracking-widest mb-6 flex items-center gap-2"><iconify-icon icon="ph:user-light"></iconify-icon> About Section</h2>
+                        <div class="flex flex-col gap-6">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-grayLight text-xs uppercase tracking-wider">Profile / Bio Image</label>
+                                <input type="file" id="admin-about-img" accept="image/*" class="w-full text-sm text-grayLight file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer transition-colors">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-grayLight text-xs uppercase tracking-wider">Biography Text</label>
+                                <textarea id="admin-about-text" rows="6" class="admin-input w-full bg-dark border border-white/10 rounded p-4 text-white text-sm leading-relaxed"></textarea>
+                            </div>
+                            <div>
+                                <button onclick="updateAboutText()" class="px-6 py-3 bg-gold text-dark font-semibold text-xs tracking-widest uppercase rounded hover:bg-goldLight transition-colors cursor-pointer">Save Content</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 4: Settings -->
+            <section id="tab-settings" class="admin-tab-view hidden">
+                <header class="mb-10 border-b border-white/5 pb-6">
+                    <h1 class="text-3xl font-cinematic text-white tracking-widest mb-2">Settings</h1>
+                </header>
+                <div class="glass-panel p-8 rounded-lg border border-white/5 max-w-xl text-grayLight text-sm">
+                    <p>Settings panel integration is currently static in this version.</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- Core Scripts -->
+    <!-- ============================================== -->
+    <script>
+        // --- 1. Memory State Management ---
+        let globalWorksData = [
+            { id: 1, title: "The Accidental Influencer", cat: "Netflix Series", img: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600", status: "Published", date: "Mar 09, 2026", tracks: [{title: "Main Title", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}, {title: "City Lights", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"}] },
+            { id: 2, title: "Zeelandia: Musical", cat: "Theatre Production", img: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=600", status: "Published", date: "Feb 21, 2026", tracks: [{title: "The First Wave", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"}] },
+            { id: 3, title: "Golden Years Exhibition", cat: "Sound Installation", img: "https://images.unsplash.com/photo-1518972553051-4040a424a1b0?q=80&w=600", status: "Published", date: "Jan 15, 2026", tracks: [{title: "Art Resounds", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"}, {title: "Reflection", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"}] },
+            { id: 4, title: "National Railway Theme", cat: "Museum Branding", img: "https://images.unsplash.com/photo-1474487059207-de084e94b374?q=80&w=600", status: "Hidden", date: "Dec 05, 2025", tracks: [{title: "Departure", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3"}] },
+            { id: 5, title: "Event Horizon", cat: "Sci-Fi Short", img: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=600", status: "Published", date: "Nov 20, 2025", tracks: [{title: "Zero Gravity", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3"}] },
+            { id: 6, title: "The Silent Echo", cat: "Psychological Drama", img: "https://images.unsplash.com/photo-1512149177596-f817c7ef5d4c?q=80&w=600", status: "Published", date: "Oct 11, 2025", tracks: [{title: "Unspoken", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"}] },
+            { id: 7, title: "Abyss", cat: "Nature Documentary", img: "https://images.unsplash.com/photo-1551244072-5d12893278ab?q=80&w=600", status: "Published", date: "Sep 02, 2025", tracks: [{title: "Deep Blue", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3"}] },
+            { id: 8, title: "Neon Pulse", cat: "Modern Cyber", img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=600", status: "Published", date: "Aug 14, 2025", tracks: [{title: "Night Run", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3"}] },
+            { id: 9, title: "Midnight Noir", cat: "Experimental Jazz", img: "https://images.unsplash.com/photo-1502451540211-1237bc9e0061?q=80&w=600", status: "Hidden", date: "Jul 22, 2025", tracks: [{title: "Rainy Alley", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}] },
+            { id: 10, title: "Fragments of Time", cat: "Fine Art Display", img: "https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=600", status: "Published", date: "Jun 30, 2025", tracks: [{title: "Clockwork", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"}] }
+        ];
+
+        // --- Utility Functions ---
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "00:00";
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        let currentlyPlayingAudio = null;
+        let currentlyPlayingBtnIcon = null;
+        let currentlyPlayingIndicator = null;
+
+        // 將 initLocalPlayers 掛載到 window 物件上，徹底解決 ReferenceError 問題
+        window.initLocalPlayers = function() {
+            document.querySelectorAll('.local-player-card').forEach(card => {
+                const audio = card.querySelector('.local-audio');
+                if(!audio) return;
+                
+                const playPauseBtn = card.querySelector('.play-pause-btn');
+                const btnIcon = playPauseBtn.querySelector('iconify-icon');
+                const progressContainer = card.querySelector('.progress-container');
+                const progressBar = card.querySelector('.progress-bar');
+                const tracklistItems = card.querySelectorAll('.track-item');
+                const currentName = card.querySelector('.current-track-name');
+                const timeDisplay = card.querySelector('.current-time-display');
+                const durationDisplay = card.querySelector('.duration-display');
+
+                if (tracklistItems.length > 0) {
+                    audio.src = tracklistItems[0].getAttribute('data-src');
+                    tracklistItems[0].classList.add('text-gold', 'bg-white/5');
+                }
+
+                audio.addEventListener('loadedmetadata', () => {
+                    if(durationDisplay) durationDisplay.innerText = formatTime(audio.duration);
+                });
+
+                audio.ontimeupdate = () => {
+                    if(timeDisplay) timeDisplay.innerText = formatTime(audio.currentTime);
+                    if (audio.duration && progressBar) progressBar.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
+                };
+
+                if (progressContainer) {
+                    progressContainer.onclick = (e) => {
+                        const rect = progressContainer.getBoundingClientRect();
+                        audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+                    };
+                }
+
+                audio.onended = () => {
+                    let nextTrack = null;
+                    for (let i = 0; i < tracklistItems.length; i++) {
+                        if (tracklistItems[i].classList.contains('text-gold')) {
+                            if (i + 1 < tracklistItems.length) nextTrack = tracklistItems[i + 1];
+                            break;
+                        }
+                    }
+                    if (nextTrack) nextTrack.click();
+                    else {
+                        btnIcon.setAttribute('icon', 'ph:play-circle-fill');
+                        currentlyPlayingIndicator?.classList.add('hidden');
+                        if (progressBar) progressBar.style.width = `0%`;
+                    }
+                };
+
+                playPauseBtn.onclick = () => {
+                    if (audio.paused) {
+                        if (currentlyPlayingAudio && currentlyPlayingAudio !== audio) {
+                            currentlyPlayingAudio.pause();
+                            currentlyPlayingBtnIcon?.setAttribute('icon', 'ph:play-circle-fill');
+                            currentlyPlayingIndicator?.classList.add('hidden');
+                        }
+                        audio.play();
+                        btnIcon.setAttribute('icon', 'ph:pause-circle-fill');
+                        currentlyPlayingAudio = audio;
+                        currentlyPlayingBtnIcon = btnIcon;
+                        const activeInd = card.querySelector('.track-item.text-gold .playing-indicator');
+                        if(activeInd) { activeInd.classList.remove('hidden'); currentlyPlayingIndicator = activeInd; }
+                    } else {
+                        audio.pause();
+                        btnIcon.setAttribute('icon', 'ph:play-circle-fill');
+                        currentlyPlayingIndicator?.classList.add('hidden');
+                    }
+                };
+
+                tracklistItems.forEach(item => {
+                    item.onclick = () => {
+                        const src = item.getAttribute('data-src');
+                        const title = item.querySelector('.track-title').innerText;
+                        
+                        if (audio.src.endsWith(src)) { playPauseBtn.click(); return; }
+                        
+                        tracklistItems.forEach(li => {
+                            li.classList.remove('text-gold', 'bg-white/5'); li.classList.add('text-grayLight');
+                            const ind = li.querySelector('.playing-indicator');
+                            if(ind) ind.classList.add('hidden');
+                        });
+                        
+                        item.classList.add('text-gold', 'bg-white/5'); item.classList.remove('text-grayLight');
+                        if(currentName) currentName.innerText = title;
+                        audio.src = src;
+                        
+                        if (currentlyPlayingAudio && currentlyPlayingAudio !== audio) {
+                            currentlyPlayingAudio.pause();
+                            currentlyPlayingBtnIcon?.setAttribute('icon', 'ph:play-circle-fill');
+                            currentlyPlayingIndicator?.classList.add('hidden');
+                        }
+                        audio.play();
+                        btnIcon.setAttribute('icon', 'ph:pause-circle-fill');
+                        currentlyPlayingAudio = audio;
+                        currentlyPlayingBtnIcon = btnIcon;
+                        const ind = item.querySelector('.playing-indicator');
+                        if(ind) {
+                            ind.classList.remove('hidden');
+                            currentlyPlayingIndicator = ind;
+                        }
+                    };
+                });
+            });
+        }
+
+        // --- 2. View Rendering & Sync ---
+        function generateWorkCardHTML(work, isHome = false) {
+            const cardClasses = isHome 
+                ? "glass-panel border border-white/10 rounded-sm flex flex-col overflow-hidden reveal-section group local-player-card" 
+                : "glass-panel border border-white/10 rounded-sm flex flex-col overflow-hidden reveal-section group local-player-card bg-darker/30 shadow-2xl";
+            const imgClass = isHome ? "duration-700 group-hover:scale-105" : "duration-1000 group-hover:scale-110";
+            const tracks = work.tracks || [];
+
+            return `
+                <div class="${cardClasses}" id="card-${work.id}">
+                    <div class="relative ${isHome ? 'aspect-[4/3]' : 'aspect-[4/5]'} overflow-hidden">
+                        <img src="${work.img}" alt="${work.title}" class="w-full h-full object-cover transition-transform ${imgClass}">
+                        <div class="absolute inset-0 ${isHome ? 'bg-gradient-to-t from-darker to-transparent' : 'bg-gradient-to-t from-darker via-darker/20 to-transparent'}"></div>
+                        <div class="absolute ${isHome ? 'bottom-4 left-6 right-6' : 'bottom-6 left-8 right-8'}">
+                            <p class="font-sans text-gold ${isHome ? 'text-xs' : 'text-[10px]'} tracking-widest uppercase mb-1 opacity-70">${work.cat}</p>
+                            <h3 class="font-cinematic ${isHome ? 'text-2xl' : 'text-2xl'} text-white tracking-widest leading-tight mb-2">${work.title}</h3>
+                        </div>
+                    </div>
+                    <div class="${isHome ? 'p-6 bg-darker' : 'p-8 bg-darker/60'} flex-1 flex flex-col justify-between">
+                        <audio class="hidden local-audio" preload="metadata"></audio>
+                        <div class="flex items-center ${isHome ? 'gap-4 mb-6' : 'gap-6 mb-8'}">
+                            <button class="play-pause-btn text-white hover:text-gold transition-all ${isHome ? 'scale-110' : 'scale-125'} cursor-pointer">
+                                <iconify-icon icon="ph:play-circle-fill" width="${isHome ? '36' : '40'}"></iconify-icon>
+                            </button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between text-[10px] text-grayLight mb-1.5 font-sans tracking-wider">
+                                    <span class="current-time-display">00:00</span>
+                                    <span class="duration-display">--:--</span>
+                                </div>
+                                <div class="w-full ${isHome ? 'h-1.5' : 'h-1'} bg-white/10 rounded-full overflow-hidden cursor-pointer progress-container">
+                                    <div class="h-full bg-gold w-0 progress-bar transition-all duration-100 ease-linear pointer-events-none"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-[10px] uppercase tracking-[0.2em] text-grayLight/40 mb-3 font-sans pb-2 border-b border-white/5 flex justify-between items-center">
+                            <span>Tracklist</span>
+                            <span class="truncate ml-4 text-right">Playing: <span class="text-gold current-track-name">${tracks.length > 0 ? tracks[0].title : 'No Track'}</span></span>
+                        </div>
+                        <ul class="flex flex-col gap-1 font-sans text-sm h-32 overflow-y-auto custom-scroll pr-2 tracklist">
+                            ${tracks.length > 0 ? tracks.map((t, i) => `
+                                <li class="p-2 rounded flex justify-between items-center text-grayLight cursor-pointer hover:bg-white/5 hover:text-white transition-colors track-item" data-src="${t.src}">
+                                    <div class="flex items-center gap-3"><span class="text-xs opacity-50 w-4">${i+1 < 10 ? '0'+(i+1) : i+1}</span> <span class="track-title tracking-widest truncate max-w-[150px] md:max-w-[200px]">${t.title}</span></div>
+                                    <div class="playing-indicator hidden flex items-end h-3"><span></span><span></span><span></span></div>
+                                </li>
+                            `).join('') : '<li class="text-grayLight text-xs italic p-2">無音軌 (No Audio)</li>'}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCatalogWorks() {
+            const grid = document.getElementById('catalog-grid');
+            const publishedWorks = globalWorksData.filter(w => w.status === 'Published');
+            grid.innerHTML = publishedWorks.map(w => generateWorkCardHTML(w, false)).join('');
+            gsap.from('#catalog-grid .local-player-card', { y: 20, opacity: 0, stagger: 0.05, duration: 0.8, ease: 'power2.out' });
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('admin-works-tbody');
+            tbody.innerHTML = globalWorksData.map(w => `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="p-4"><img src="${w.img}" class="w-12 h-12 object-cover rounded ${w.status === 'Hidden' ? 'grayscale' : ''}"></td>
+                    <td class="p-4 font-cinematic text-lg truncate max-w-[200px]">${w.title}</td>
+                    <td class="p-4 text-grayLight text-xs tracking-widest uppercase">${w.cat}</td>
+                    <td class="p-4 text-grayLight text-xs">${w.date}</td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 text-[10px] uppercase tracking-wider rounded ${w.status === 'Published' ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-grayLight'} cursor-pointer hover:opacity-80 transition-opacity" onclick="toggleWorkStatus(${w.id})">${w.status}</span>
+                    </td>
+                    <td class="p-4 text-right">
+                        <button class="text-grayLight hover:text-gold transition-colors p-2 cursor-pointer" onclick="editWork(${w.id})"><iconify-icon icon="ph:pencil-simple-light" width="18"></iconify-icon></button>
+                        <button class="text-grayLight hover:text-red-400 transition-colors p-2 cursor-pointer" onclick="deleteWork(${w.id})"><iconify-icon icon="ph:trash-light" width="18"></iconify-icon></button>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('dash-total-works').innerText = globalWorksData.length;
+            const publishedWorks = globalWorksData.filter(w => w.status === 'Published');
+            document.getElementById('dash-pub-works').innerText = publishedWorks.length;
+        }
+
+        // GSAP ScrollTrigger 動畫重新綁定機制
+        function bindScrollReveals() {
+            const unbounds = document.querySelectorAll('.reveal-section:not(.bound-reveal)');
+            if (unbounds.length === 0) return; 
+            
+            unbounds.forEach(section => {
+                section.classList.add('bound-reveal');
+                gsap.to(section, { scrollTrigger: { trigger: section, start: 'top 85%' }, opacity: 1, y: 0, duration: 1.5, ease: 'power3.out' });
+            });
+            ScrollTrigger.refresh();
+        }
+
+        function syncAllViews() {
+            const publishedWorks = globalWorksData.filter(w => w.status === 'Published');
+            document.getElementById('home-works-grid').innerHTML = publishedWorks.slice(0, 3).map(w => generateWorkCardHTML(w, true)).join('');
+            renderCatalogWorks(); 
+            renderAdminTable();
+            window.initLocalPlayers(); // Re-bind players after HTML injection
+            bindScrollReveals(); 
+        }
+
+        // --- 3. Works Manager (Edit Views) ---
+        let currentEditingId = null;
+
+        // 動態新增音軌輸入欄位
+        function addTrackInput(title = '', src = '') {
+            const container = document.getElementById('admin-tracks-container');
+            const div = document.createElement('div');
+            div.className = 'track-item-input flex flex-col md:flex-row md:items-center gap-4 p-4 bg-black/30 border border-white/5 rounded';
+            div.innerHTML = `
+                <div class="flex-1 flex flex-col gap-2">
+                    <input type="text" class="track-title admin-input w-full bg-dark/50 border border-white/10 rounded p-2 text-white text-sm" placeholder="Track Title (e.g. Main Theme)" value="${title}">
+                    <div class="flex items-center gap-2">
+                        <input type="file" accept="audio/*" class="track-file w-full text-xs text-grayLight file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-white/10 file:text-white cursor-pointer">
+                        <input type="hidden" class="track-src-hidden" value="${src}">
+                    </div>
+                    ${src ? `<p class="text-[10px] text-green-400">目前已有音檔，上傳新檔可覆蓋。</p>` : ''}
+                </div>
+                <button type="button" onclick="this.closest('.track-item-input').remove()" class="text-red-400 hover:text-red-300 transition-colors p-2 cursor-pointer"><iconify-icon icon="ph:trash" width="24"></iconify-icon></button>
+            `;
+            container.appendChild(div);
+        }
+
+        function openWorkForm(isEdit = false) {
+            document.getElementById('admin-works-list-view').classList.add('hidden');
+            document.getElementById('admin-work-form-view').classList.remove('hidden');
+            
+            if(!isEdit) {
+                currentEditingId = null;
+                document.getElementById('form-title').innerText = "Publish New Project";
+                document.getElementById('btn-submit-work').innerText = "Publish Project";
+                document.getElementById('admin-work-title').value = '';
+                document.getElementById('admin-work-category').value = '';
+                document.getElementById('admin-work-status').checked = true;
+                document.getElementById('admin-work-img').value = '';
+                
+                // 清空並預設給一個音軌欄位
+                document.getElementById('admin-tracks-container').innerHTML = '';
+                addTrackInput();
+            }
+        }
+
+        function closeWorkForm() {
+            document.getElementById('admin-work-form-view').classList.add('hidden');
+            document.getElementById('admin-works-list-view').classList.remove('hidden');
+        }
+
+        function editWork(id) {
+            const w = globalWorksData.find(x => x.id === id);
+            if(!w) return;
+            currentEditingId = id;
+            
+            openWorkForm(true);
+            document.getElementById('form-title').innerText = "Edit Project: " + w.title;
+            document.getElementById('btn-submit-work').innerText = "Save Changes";
+            
+            document.getElementById('admin-work-title').value = w.title;
+            document.getElementById('admin-work-category').value = w.cat;
+            document.getElementById('admin-work-status').checked = (w.status === 'Published');
+
+            // 載入多軌音軌
+            document.getElementById('admin-tracks-container').innerHTML = '';
+            if (w.tracks && w.tracks.length > 0) {
+                w.tracks.forEach(t => addTrackInput(t.title, t.src));
+            } else {
+                addTrackInput(); // 如果沒有音軌，預設給一個空欄位
+            }
+        }
+
+        async function saveWorkData() {
+            const title = document.getElementById('admin-work-title').value;
+            const category = document.getElementById('admin-work-category').value;
+            const imgFile = document.getElementById('admin-work-img').files[0];
+            const isPublished = document.getElementById('admin-work-status').checked;
+            const btn = document.getElementById('btn-submit-work');
+
+            if (!title || !category) {
+                alert('標題與分類為必填項目！');
+                return;
+            }
+
+            btn.innerText = 'Saving...';
+            
+            try {
+                let imgUrl = '';
+                if (imgFile) imgUrl = URL.createObjectURL(imgFile);
+                
+                // 收集所有音軌資料
+                let tracks = [];
+                document.querySelectorAll('.track-item-input').forEach(item => {
+                    let tTitle = item.querySelector('.track-title').value;
+                    const tFile = item.querySelector('.track-file').files[0];
+                    const tHiddenSrc = item.querySelector('.track-src-hidden').value;
+                    
+                    let tSrc = tHiddenSrc;
+                    if (tFile) {
+                        tSrc = URL.createObjectURL(tFile);
+                        if(!tTitle) tTitle = tFile.name.replace(/\.[^/.]+$/, ""); // 若沒填標題則使用檔名
+                    }
+                    
+                    if(tSrc) {
+                        tracks.push({ title: tTitle || 'Untitled Track', src: tSrc });
+                    }
+                });
+                
+                if (currentEditingId) {
+                    const index = globalWorksData.findIndex(w => w.id === currentEditingId);
+                    if(index > -1) {
+                        globalWorksData[index].title = title;
+                        globalWorksData[index].cat = category;
+                        globalWorksData[index].status = isPublished ? "Published" : "Hidden";
+                        globalWorksData[index].tracks = tracks; // 更新音軌陣列
+                        if(imgUrl) globalWorksData[index].img = imgUrl;
+                    }
+                    alert('作品更新成功！');
+                } else {
+                    if(!imgFile) { alert('新作品必須上傳封面！'); btn.innerText = 'Publish Project'; return; }
+                    const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+                    const newWork = {
+                        id: Date.now(),
+                        title: title,
+                        cat: category,
+                        img: imgUrl,
+                        status: isPublished ? "Published" : "Hidden",
+                        date: dateStr,
+                        tracks: tracks // 儲存音軌陣列
+                    };
+                    globalWorksData.unshift(newWork);
+                    alert('專案發佈成功！');
+                }
+
+                syncAllViews();
+                closeWorkForm();
+            } catch (error) { 
+                console.error(error); 
+                alert('發生錯誤');
+            } finally { 
+                btn.innerText = currentEditingId ? 'Save Changes' : 'Publish Work'; 
+            }
+        }
+
+        window.toggleWorkStatus = function(id) {
+            const work = globalWorksData.find(w => w.id === id);
+            if(work) {
+                work.status = work.status === 'Published' ? 'Hidden' : 'Published';
+                syncAllViews(); 
+            }
+        }
+
+        window.deleteWork = function(id) {
+            if(confirm("確定要刪除這筆作品嗎？前台將會同步移除。")) {
+                globalWorksData = globalWorksData.filter(w => w.id !== id);
+                syncAllViews();
+            }
+        }
+
+        // --- 4. Auth Flow & View Toggles ---
+        function handleLogin() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('btn-login');
+            const errorMsg = document.getElementById('login-error');
+
+            if (!username || !password) return;
+            btn.innerText = 'Verifying...';
+            errorMsg.classList.add('hidden');
+
+            if (username === '1234' && password === '1234') {
+                localStorage.setItem('adminToken', 'session_token');
+                closeLogin();
+                setTimeout(() => toggleAdmin(), 300);
+            } else {
+                errorMsg.innerText = "Access Denied: Incorrect Username or Password";
+                errorMsg.classList.remove('hidden');
+            }
+            btn.innerText = 'Verify Access';
+        }
+
+        function toggleAdmin() {
+            const token = localStorage.getItem('adminToken');
+            const dashboard = document.getElementById('admin-dashboard');
+            const loginModal = document.getElementById('login-modal');
+
+            if (dashboard.classList.contains('hidden')) {
+                if (!token) {
+                    loginModal.classList.remove('hidden');
+                    loginModal.classList.add('flex'); 
+                    setTimeout(() => loginModal.classList.remove('opacity-0'), 10);
+                } else {
+                    dashboard.classList.remove('hidden');
+                    dashboard.classList.add('flex'); 
+                    document.querySelectorAll('.admin-sidebar-btn')[0].click(); 
+                    setTimeout(() => gsap.fromTo(dashboard, {opacity: 0, scale: 0.98}, {opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out'}), 10);
+                    document.body.style.overflow = 'hidden'; 
+                }
+            } else {
+                gsap.to(dashboard, {opacity: 0, scale: 0.98, duration: 0.3, ease: 'power3.in', onComplete: () => {
+                    dashboard.classList.add('hidden');
+                    dashboard.classList.remove('flex');
+                    document.body.style.overflow = 'auto'; 
+                }});
+            }
+        }
+
+        function closeLogin() {
+            const loginModal = document.getElementById('login-modal');
+            loginModal.classList.add('opacity-0');
+            setTimeout(() => {
+                loginModal.classList.add('hidden');
+                loginModal.classList.remove('flex');
+                document.getElementById('login-password').value = '';
+            }, 300);
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('adminToken');
+            toggleAdmin(); 
+        }
+
+        function toggleMobileSidebar() {
+            const aside = document.getElementById('admin-sidebar');
+            const overlay = document.getElementById('mobile-sidebar-overlay');
+            if(aside.classList.contains('-translate-x-full')) {
+                aside.classList.remove('-translate-x-full', 'hidden');
+                aside.classList.add('flex');
+                overlay.classList.remove('hidden');
+            } else {
+                aside.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                setTimeout(()=> aside.classList.add('hidden'), 300);
+            }
+        }
+
+        function switchAdminTab(targetTabId, clickedBtn) {
+            document.querySelectorAll('.admin-sidebar-btn').forEach(btn => {
+                btn.classList.remove('text-gold', 'bg-white/5', 'border-l-2', 'border-gold');
+                btn.classList.add('text-grayLight');
+            });
+            clickedBtn.classList.remove('text-grayLight');
+            clickedBtn.classList.add('text-gold', 'bg-white/5', 'border-l-2', 'border-gold');
+
+            const currentTab = document.querySelector('.admin-tab-view:not(.hidden)');
+            if(currentTab && currentTab.id === targetTabId) return;
+
+            const nextTab = document.getElementById(targetTabId);
+            const tl = gsap.timeline();
+            
+            if(currentTab) {
+                tl.to(currentTab, {opacity: 0, y: 10, duration: 0.2, ease: 'power2.in'})
+                  .call(() => currentTab.classList.add('hidden'));
+            }
+            tl.call(() => nextTab.classList.remove('hidden'))
+              .fromTo(nextTab, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.3, ease: 'power2.out'});
+        }
+
+        // --- Site Content Edits ---
+        document.getElementById('admin-hero-bg').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            document.querySelector('#hero-bg img').src = URL.createObjectURL(file);
+            alert("首頁背景已更新預覽！");
+        });
+
+        document.getElementById('admin-about-img').addEventListener('change', function(e) {
+            if(e.target.files[0]) {
+                document.querySelector('#about-img-display').src = URL.createObjectURL(e.target.files[0]);
+                alert("簡介照片已更新預覽！");
+            }
+        });
+
+        function updateAboutText() {
+            const newText = document.getElementById('admin-about-text').value;
+            if (newText.trim() === '') return;
+            document.getElementById('about-content-display').innerHTML = newText.replace(/\n/g, '<br>');
+            alert('文字內容已成功儲存！');
+        }
+
+        // --- 首頁動畫與轉場 ---
+        function initHomeAnims() {
+            document.querySelectorAll('.split-text:not(.split-bound)').forEach(el => {
+                el.classList.add('split-bound');
+                const text = el.innerHTML; el.innerHTML = '';
+                const div = document.createElement('div'); div.innerHTML = text;
+                Array.from(div.childNodes).forEach(node => {
+                    if(node.nodeType === 3) {
+                        node.textContent.split('').forEach(char => {
+                            if(char.trim() === '') el.innerHTML += `<span class="split-word">&nbsp;</span>`;
+                            else el.innerHTML += `<span class="split-word"><span class="split-char">${char}</span></span>`;
+                        });
+                    } else el.appendChild(node);
+                });
+            });
+
+            const heroTl = gsap.timeline();
+            heroTl.fromTo('#hero-bg img', { scale: 1.1, opacity: 0, filter: 'blur(15px)' }, { scale: 1, opacity: 0.6, filter: 'blur(0px)', duration: 3.5, ease: 'power2.out' }, 0)
+                  .to('.split-char', { y: '0%', opacity: 1, stagger: 0.03, duration: 1.5, ease: 'expo.out' }, 0.5);
+            
+            bindScrollReveals();
+        }
+
+        function navigateToCatalog() {
+            const tl = gsap.timeline();
+            const columns = document.querySelectorAll('.transition-column');
+            const catalog = document.getElementById('catalog-view');
+            const home = document.getElementById('home-view');
+
+            tl.set('#transition-container', { pointerEvents: 'auto' })
+              .to(columns, { scaleY: 1, duration: 0.8, stagger: 0.1, ease: 'expo.inOut' })
+              .call(() => {
+                  catalog.classList.remove('hidden');
+                  home.classList.add('hidden');
+                  window.scrollTo(0, 0);
+              })
+              .to(columns, { scaleY: 0, transformOrigin: 'bottom', duration: 0.8, stagger: 0.05, ease: 'expo.inOut' }, "+=0.2")
+              .set('#transition-container', { pointerEvents: 'none' })
+              .call(() => {
+                  gsap.from('#catalog-grid .local-player-card', { y: 50, opacity: 0, stagger: 0.1, duration: 1, ease: 'power4.out' });
+              });
+        }
+
+        function backToHome() {
+            const tl = gsap.timeline();
+            const columns = document.querySelectorAll('.transition-column');
+            const catalog = document.getElementById('catalog-view');
+            const home = document.getElementById('home-view');
+
+            tl.set('#transition-container', { pointerEvents: 'auto' })
+              .set(columns, { transformOrigin: 'top' })
+              .to(columns, { scaleY: 1, duration: 0.8, stagger: 0.05, ease: 'expo.inOut' })
+              .call(() => {
+                  catalog.classList.add('hidden');
+                  home.classList.remove('hidden');
+                  window.scrollTo(0, 0);
+              })
+              .to(columns, { scaleY: 0, transformOrigin: 'bottom', duration: 0.8, stagger: 0.05, ease: 'expo.inOut' }, "+=0.2")
+              .set('#transition-container', { pointerEvents: 'none' });
+        }
+
+        // --- Initialization & Scroll Events ---
+        window.onload = () => {
+            syncAllViews(); 
+            initHomeAnims(); 
+            const pElement = document.querySelector('#about-content-container p');
+            if (pElement) document.getElementById('admin-about-text').value = pElement.innerText.trim();
+        };
+
+        const navbar = document.getElementById('navbar');
+        const scrollTopBtn = document.getElementById('scroll-to-top');
+        
+        window.onscroll = () => {
+            // Navbar behavior
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-dark/95', 'py-4');
+                navbar.classList.remove('glass-panel', 'py-5');
+            } else {
+                navbar.classList.remove('bg-dark/95', 'py-4');
+                navbar.classList.add('glass-panel', 'py-5');
+            }
+            
+            // Scroll to Top button behavior
+            if (window.scrollY > 400) {
+                scrollTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+            } else {
+                scrollTopBtn.classList.add('opacity-0', 'pointer-events-none');
+            }
+        };
+
+        scrollTopBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    </script>
+</body>
+</html>
